@@ -6,11 +6,31 @@
   <link rel="icon" type="image/svg+xml" href="/vite.svg" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Game of Life</title>
+  <script src="https://cdn.jsdelivr.net/npm/p5@1.11.2/lib/p5.min.js" defer></script>
+  <script type="module" src="src/sketch.js" defer></script>
+  <link rel="stylesheet" href="/src/style.css">
 </head>
 
 <body>
-  <div id="app"></div>
-  <script type="module" src="/src/main.js"></script>
+  <main></main>
+  <div id="controls">
+    <div id="details">
+      <span>Population: <span id="population">0</span></span>
+      <span>Generation: <span id="generation">0</span></span>
+    </div>
+    <button type="button" id="random">RANDOM</button>
+    <button type="button" id="playpause">PLAY</button>
+    <button type="reset" id="reset">RESET</button>
+    <label for="speed">FPS
+      <input type="range" name="speed" id="speed" min="1" max="60">
+    </label>
+    <label for="size">Cell size
+      <input type="range" name="size" id="size" min="1" max="60" step="1"></label>
+    <label for="color">Cell color
+      <input type="color" name="color" id="color"></label>
+    <label for="grid">Toggle grid
+      <input type="checkbox" name="grid" id="grid"></label>
+  </div>
 </body>
 
 </html>

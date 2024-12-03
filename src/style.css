@@ -2,6 +2,55 @@
   color-scheme: light dark;
 }
 
-@media (prefers-color-scheme: light) {
-  
+*, *::after, *::before {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  background-color: white;
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+main {
+  width: 100%;
+  flex-grow: 1;
+  display: grid;
+  place-content: center;
+}
+
+#controls {
+  padding-inline: 2rem;
+  padding-block: 1rem;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 1rem;
+}
+
+label {
+  display: flex;
+  flex-direction: column-reverse;
+  align-items: center;
+  justify-content: space-between;
+}
+
+button {
+  padding-inline: 1rem;
+  padding-block: 0.4rem;
+}
+
+#details {
+  display: flex;
+  flex-direction: column;
+}
+
+@media (prefers-color-scheme: dark) {
+  body {
+    background-color: black;
+  }
 }
