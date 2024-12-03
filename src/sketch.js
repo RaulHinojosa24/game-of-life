@@ -16,15 +16,18 @@ const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-schem
 let strokeSize = 1
 let cellSize = 30
 let speed = 60
+let cellColor = prefersDark ? '#ffffff' : '#000000'
+let displayGrid = true
+
 let columnCount
 let rowCount
+
+let isRunning = false
 let currentPopulation = 0
 let currentGeneration = 0
 let currentCells = []
 let nextCells = []
-let isRunning = false
-let cellColor = prefersDark ? '#ffffff' : '#000000'
-let displayGrid = true
+
 const w = main.scrollWidth
 const h = main.scrollHeight
 
@@ -33,76 +36,45 @@ speedInput.value = speed
 sizeInput.value = cellSize
 gridInput.checked = displayGrid
 
-const sketch = (p) => {
+const sketch = (p5) => {
   let grid
 
   const buttonActions = {
     play: () => {
       if (!currentGeneration) return
-      p.loop()
-      p.updateIsRunning(true)
+      p5.loop()
+      updateIsRunning(true)
     },
     pause: () => {
-      p.noLoop()
-      p.updateIsRunning(false)
+      p5.noLoop()
+      updateIsRunning(false)
     },
     randomize: () => {
-      p.noLoop()
-      p.updateIsRunning(false)
-      p.randomizeBoard()
-      p.paintBoard()
-      p.updateGeneration(1)
+      p5.noLoop()
+      updateIsRunning(false)
+      randomizeBoard()
+      paintBoard()
+      updateGeneration(1)
     },
     reset: () => {
-      p.noLoop()
-      p.updateIsRunning(false)
-      p.generate(true)
-      p.paintBoard()
-      p.updateGeneration(0)
+      p5.noLoop()
+      updateIsRunning(false)
+      generate(true)
+      paintBoard()
+      updateGeneration(0)
     }
   }
 
-  p.updateGridSize = () => {
-    columnCount = p.floor(p.width / cellSize)
-    rowCount = p.floor(p.height / cellSize)
+  p5.setup = () => {
+    p5.frameRate(speed)
+    p5.createCanvas(w - w % cellSize, h - h % cellSize)
+    p5.clear()
 
-    for (let row = 0; row < rowCount; row++) {
-      currentCells[row] = new Array(columnCount).fill(0)
-      nextCells[row] = new Array(columnCount).fill(0)
-    }
+    updateGridSize()
+    paintBoard()
 
-    p.updateGridImage()
-  }
-
-  p.updateCanvasSize = () => {
-    p.resizeCanvas(w - w % cellSize, h - h % cellSize)
-  }
-
-  p.updateGridImage = () => {
-    grid = p.createGraphics(p.width, p.height)
-    grid.clear()
-
-    grid.strokeWeight(strokeSize)
-    grid.stroke(100)
-
-    for (let row = 0; row <= rowCount; row++) {
-      grid.line(0, cellSize * row, p.width, cellSize * row)
-    }
-    for (let col = 0; col <= columnCount; col++) {
-      grid.line(cellSize * col, 0, cellSize * col, p.height)
-    }
-  }
-
-  p.setup = () => {
-    p.frameRate(speed)
-    p.createCanvas(w - w % cellSize, h - h % cellSize)
-    p.clear()
-
-    p.updateGridSize()
-
-    p.paintBoard()
-    p.noLoop()
-    p.describe(
+    p5.noLoop()
+    p5.describe(
       "Grid of squares that switch between white and black, demonstrating a simulation of John Conway's Game of Life. When clicked, the simulation resets."
     )
 
@@ -111,7 +83,7 @@ const sketch = (p) => {
     resetButton.addEventListener('click', buttonActions.reset)
     speedInput.addEventListener('input', (e) => {
       speed = +e.target.value
-      p.frameRate(speed)
+      p5.frameRate(speed)
     })
     sizeInput.addEventListener('input', (e) => {
       cellSize = +e.target.value
@@ -119,28 +91,59 @@ const sketch = (p) => {
         ? 1
         : (cellSize / 20).toFixed(1)
 
-      p.updateCanvasSize()
-      p.updateGridSize()
+      updateCanvasSize()
+      updateGridSize()
       buttonActions.reset()
     })
     colorInput.addEventListener('change', (e) => {
       cellColor = e.target.value
-      p.paintBoard()
+      paintBoard()
     })
     gridInput.addEventListener('change', (e) => {
       displayGrid = e.target.checked
-      p.paintBoard()
+      paintBoard()
     })
   }
 
-  p.updateIsRunning = (state) => {
+  function updateGridSize () {
+    columnCount = p5.floor(p5.width / cellSize)
+    rowCount = p5.floor(p5.height / cellSize)
+
+    for (let row = 0; row < rowCount; row++) {
+      currentCells[row] = new Array(columnCount).fill(0)
+      nextCells[row] = new Array(columnCount).fill(0)
+    }
+
+    updateGridImage()
+  }
+
+  function updateCanvasSize () {
+    p5.resizeCanvas(w - w % cellSize, h - h % cellSize)
+  }
+
+  function updateGridImage () {
+    grid = p5.createGraphics(p5.width, p5.height)
+    grid.clear()
+
+    grid.strokeWeight(strokeSize)
+    grid.stroke(100)
+
+    for (let row = 0; row <= rowCount; row++) {
+      grid.line(0, cellSize * row, p5.width, cellSize * row)
+    }
+    for (let col = 0; col <= columnCount; col++) {
+      grid.line(cellSize * col, 0, cellSize * col, p5.height)
+    }
+  }
+
+  function updateIsRunning (state) {
     isRunning = state
     playPauseButton.innerHTML = isRunning ? 'PAUSE' : 'PLAY'
     playPauseButton.removeEventListener('click', isRunning ? buttonActions.play : buttonActions.pause)
     playPauseButton.addEventListener('click', isRunning ? buttonActions.pause : buttonActions.play)
   }
 
-  p.updateGeneration = (value) => {
+  function updateGeneration (value) {
     currentGeneration = value !== undefined
       ? value
       : currentGeneration + 1
@@ -148,7 +151,7 @@ const sketch = (p) => {
     generationSpan.innerHTML = currentGeneration
   }
 
-  p.updatePopulation = (reset) => {
+  function updatePopulation (reset) {
     currentPopulation = reset
       ? 0
       : currentPopulation + 1
@@ -156,16 +159,16 @@ const sketch = (p) => {
     populationSpan.innerHTML = currentPopulation
   }
 
-  p.draw = () => {
+  p5.draw = () => {
     if (!isRunning) return
-    p.generate()
-    p.updateGeneration()
-    p.paintBoard()
+    generate()
+    updateGeneration()
+    paintBoard()
   }
 
-  p.paintBoard = () => {
-    p.updatePopulation(true)
-    p.clear()
+  function paintBoard () {
+    updatePopulation(true)
+    p5.clear()
 
     for (let row = 0; row < rowCount; row++) {
       for (let col = 0; col < columnCount; col++) {
@@ -173,28 +176,28 @@ const sketch = (p) => {
 
         if (!currentCell) continue
 
-        p.updatePopulation()
+        updatePopulation()
 
-        p.fill(cellColor)
-        p.noStroke()
-        p.rect(col * cellSize, row * cellSize, cellSize, cellSize)
+        p5.fill(cellColor)
+        p5.noStroke()
+        p5.rect(col * cellSize, row * cellSize, cellSize, cellSize)
       }
     }
 
     if (displayGrid) {
-      p.image(grid, 0, 0)
+      p5.image(grid, 0, 0)
     }
   }
 
-  p.randomizeBoard = () => {
+  function randomizeBoard () {
     for (let row = 0; row < rowCount; row++) {
       for (let col = 0; col < columnCount; col++) {
-        currentCells[row][col] = p.random([0, 1])
+        currentCells[row][col] = p5.random([0, 1])
       }
     }
   }
 
-  p.generate = (reset) => {
+  function generate (reset) {
     for (let row = 0; row < rowCount; row++) {
       for (let col = 0; col < columnCount; col++) {
         if (reset) {
