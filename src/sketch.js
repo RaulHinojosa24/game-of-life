@@ -13,12 +13,7 @@ const populationSpan = document.querySelector('#population')
 const generationSpan = document.querySelector('#generation')
 const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
 
-const getStrokeSize = (cellSize) => {
-  return cellSize > 20
-    ? 1
-    : (cellSize / 20).toFixed(1)
-}
-
+let strokeSize = 1
 let cellSize = 30
 let speed = 60
 let columnCount
@@ -29,7 +24,6 @@ let currentCells = []
 let nextCells = []
 let isRunning = false
 let cellColor = prefersDark ? '#ffffff' : '#000000'
-const blankCellColor = prefersDark ? 0 : 255
 let displayGrid = true
 const w = main.scrollWidth
 const h = main.scrollHeight
@@ -40,6 +34,8 @@ sizeInput.value = cellSize
 gridInput.checked = displayGrid
 
 const sketch = (p) => {
+  let grid
+
   const buttonActions = {
     play: () => {
       if (!currentGeneration) return
@@ -54,14 +50,14 @@ const sketch = (p) => {
       p.noLoop()
       p.updateIsRunning(false)
       p.randomizeBoard()
-      p.paintBoard(true)
+      p.paintBoard()
       p.updateGeneration(1)
     },
     reset: () => {
       p.noLoop()
       p.updateIsRunning(false)
       p.generate(true)
-      p.paintBoard(true)
+      p.paintBoard()
       p.updateGeneration(0)
     }
   }
@@ -74,20 +70,37 @@ const sketch = (p) => {
       currentCells[row] = new Array(columnCount).fill(0)
       nextCells[row] = new Array(columnCount).fill(0)
     }
+
+    p.updateGridImage()
   }
 
   p.updateCanvasSize = () => {
     p.resizeCanvas(w - w % cellSize, h - h % cellSize)
   }
 
+  p.updateGridImage = () => {
+    grid = p.createGraphics(p.width, p.height)
+    grid.clear()
+
+    grid.strokeWeight(strokeSize)
+    grid.stroke(100)
+
+    for (let row = 0; row <= rowCount; row++) {
+      grid.line(0, cellSize * row, p.width, cellSize * row)
+    }
+    for (let col = 0; col <= columnCount; col++) {
+      grid.line(cellSize * col, 0, cellSize * col, p.height)
+    }
+  }
+
   p.setup = () => {
     p.frameRate(speed)
     p.createCanvas(w - w % cellSize, h - h % cellSize)
-    p.background(blankCellColor)
+    p.clear()
 
     p.updateGridSize()
 
-    p.paintBoard(true)
+    p.paintBoard()
     p.noLoop()
     p.describe(
       "Grid of squares that switch between white and black, demonstrating a simulation of John Conway's Game of Life. When clicked, the simulation resets."
@@ -102,6 +115,9 @@ const sketch = (p) => {
     })
     sizeInput.addEventListener('input', (e) => {
       cellSize = +e.target.value
+      strokeSize = cellSize > 20
+        ? 1
+        : (cellSize / 20).toFixed(1)
 
       p.updateCanvasSize()
       p.updateGridSize()
@@ -109,11 +125,11 @@ const sketch = (p) => {
     })
     colorInput.addEventListener('change', (e) => {
       cellColor = e.target.value
-      p.paintBoard(false)
+      p.paintBoard()
     })
     gridInput.addEventListener('change', (e) => {
       displayGrid = e.target.checked
-      p.paintBoard(true)
+      p.paintBoard()
     })
   }
 
@@ -147,31 +163,26 @@ const sketch = (p) => {
     p.paintBoard()
   }
 
-  p.paintBoard = (doItAll) => {
-    if (doItAll !== false) {
-      p.updatePopulation(true)
-    }
+  p.paintBoard = () => {
+    p.updatePopulation(true)
+    p.clear()
 
     for (let row = 0; row < rowCount; row++) {
       for (let col = 0; col < columnCount; col++) {
         const currentCell = currentCells[row][col] || 0
-        const previousCell = nextCells[row][col] || 0
 
-        if (doItAll !== false && currentCell) {
-          p.updatePopulation()
-        }
+        if (!currentCell) continue
 
-        if (doItAll === true ||
-          (doItAll === false && currentCell) ||
-          (doItAll === undefined && currentCell !== previousCell)) {
-          p.fill(currentCell ? cellColor : blankCellColor)
-          p.strokeWeight(displayGrid
-            ? getStrokeSize(cellSize)
-            : 0)
-          p.stroke(100)
-          p.rect(col * cellSize, row * cellSize, cellSize, cellSize)
-        }
+        p.updatePopulation()
+
+        p.fill(cellColor)
+        p.noStroke()
+        p.rect(col * cellSize, row * cellSize, cellSize, cellSize)
       }
+    }
+
+    if (displayGrid) {
+      p.image(grid, 0, 0)
     }
   }
 
