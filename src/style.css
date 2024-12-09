@@ -1,35 +1,111 @@
 :root {
   color-scheme: light dark;
+  
+  --menu-color: #f8f8f8;
 }
 
 *, *::after, *::before {
   box-sizing: border-box;
 }
 
+button:hover, input:hover {
+  cursor: pointer;
+}
+ 
 body {
   margin: 0;
   padding: 0;
   background-color: white;
   width: 100vw;
   height: 100vh;
+  max-height: 100vh;
+  overflow-x: hidden;
   display: flex;
-  flex-direction: column;
+  flex-direction: row-reverse;
+}
+/* body:has(nav.right), nav.right #controls {
+  transform: rotateY(180deg);
+} */
+body:has(nav.right) {
+  flex-direction: row;
 }
 
 main {
   width: 100%;
-  flex-grow: 1;
+  height: 100%;
+  flex-shrink: 0;
   display: grid;
   place-content: center;
 }
 
-#controls {
-  padding-inline: 2rem;
-  padding-block: 1rem;
+nav {
+  transition: transform .3s ease-in-out;
   display: flex;
-  flex-wrap: wrap;
-  align-items: flex-start;
+  flex-direction: row-reverse;
+  align-items: center;
+  transform: translateX(24px);
+  filter: drop-shadow(0px 3px 3px rgb(0, 0, 0, .5));
+  pointer-events: none;
+}
+
+nav * {
+  pointer-events: all;
+}
+
+nav.right {
+  flex-direction: row;
+  transform: translateX(-24px);
+}
+
+nav.open {
+  transform: translateX(100%);
+}
+
+nav.right.open {
+  transform: translateX(-100%);
+}
+
+#toggle-controls {
+  padding: 0;
+  padding-block: 2rem;
+  background-color: var(--menu-color);
+  border: none;
+  margin-inline: auto;
+  width: 24px;
+  border-top-right-radius: 100%;
+  border-bottom-right-radius: 100%;
+  transition: opacity .1s ease-in-out;
+  opacity: .5;
+  transform: translateX(-1px);
+}
+
+nav.right #toggle-controls {
+  rotate: 180deg;
+}
+
+#toggle-controls svg {
+  rotate: 90deg;
+  transition: transform .3s ease-in-out;
+}
+
+nav.open #toggle-controls svg {
+  transform: rotateX(180deg);
+}
+
+nav.open #toggle-controls, #toggle-controls:hover, #toggle-controls:focus, #toggle-controls:active {
+  opacity: 1;
+}
+
+#controls {
+  height: 100%;
+  width: min-content;
+  padding-inline: 1rem;
+  padding-block: 2rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   gap: 1rem;
+  background-color: var(--menu-color);
 }
 
 label {
@@ -50,6 +126,10 @@ button {
 }
 
 @media (prefers-color-scheme: dark) {
+  :root {
+    --menu-color: #1f1f1f;
+  }
+
   body {
     background-color: black;
   }

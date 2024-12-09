@@ -41,7 +41,7 @@ const sketch = (p5) => {
 
   const buttonActions = {
     play: () => {
-      if (!currentGeneration) return
+      if (!currentPopulation) return
       p5.loop()
       updateIsRunning(true)
     },
@@ -151,10 +151,10 @@ const sketch = (p5) => {
     generationSpan.innerHTML = currentGeneration
   }
 
-  function updatePopulation (reset) {
-    currentPopulation = reset
+  function updatePopulation (amount) {
+    currentPopulation = amount === true
       ? 0
-      : currentPopulation + 1
+      : currentPopulation + amount
 
     populationSpan.innerHTML = currentPopulation
   }
@@ -176,15 +176,23 @@ const sketch = (p5) => {
 
         if (!currentCell) continue
 
-        updatePopulation()
+        updatePopulation(1)
 
-        p5.fill(cellColor)
-        p5.noStroke()
-        p5.rect(col * cellSize, row * cellSize, cellSize, cellSize)
+        paintCell(col, row)
       }
     }
 
     if (displayGrid) {
+      p5.image(grid, 0, 0)
+    }
+  }
+
+  function paintCell (x, y, paintGrid) {
+    p5.fill(cellColor)
+    p5.noStroke()
+    p5.rect(x * cellSize, y * cellSize, cellSize, cellSize)
+
+    if (displayGrid && paintGrid) {
       p5.image(grid, 0, 0)
     }
   }
