@@ -18,8 +18,11 @@
 </head>
 
 <body>
-  <main></main>
-  <nav class="right">
+  <main>
+    <canvas id="boardCanvas"></canvas>
+    <canvas id="gridCanvas"></canvas>
+  </main>
+  <nav>
     <button type="button" id="toggle-controls">
       <span id="left"></span>
       <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="currentColor">
@@ -27,25 +30,27 @@
       </svg>
       <span id="right"></span>
     </button>
-  <div id="controls">
-    <div id="details">
-      <span>Population: <span id="population">0</span></span>
-      <span>Generation: <span id="generation">0</span></span>
-    </div>
+    <div id="controls">
+      <div id="details">
+        <span>Population: <span id="population">0</span></span>
+        <span>Generation: <span id="generation">0</span></span>
+      </div>
       <button type="button" id="flip-side">FLIP CONTROLS</button>
-    <button type="button" id="random">RANDOM</button>
-    <button type="button" id="playpause">PLAY</button>
-    <button type="reset" id="reset">RESET</button>
-    <label for="speed">FPS
-      <input type="range" name="speed" id="speed" min="1" max="60">
-    </label>
-    <label for="size">Cell size
-      <input type="range" name="size" id="size" min="1" max="60" step="1"></label>
-    <label for="color">Cell color
-      <input type="color" name="color" id="color"></label>
-    <label for="grid">Toggle grid
-      <input type="checkbox" name="grid" id="grid"></label>
-  </div>
+      <button type="button" id="shuffle">SHUFFLE (S)</button>
+      <button type="button" id="playpause">PLAY (P)</button>
+      <button type="reset" id="reset">RESET (R)</button>
+      <label for="speed">FPS
+        <input type="range" name="speed" id="speed" min="1" max="60" step="1">
+      </label>
+      <label for="size">Cell size
+        <input type="range" name="size" id="size" min="1" max="60" step="1"></label>
+      <label for="color">Cell color
+        <input type="color" name="color" id="color"></label>
+      <label for="grid">Toggle grid
+        <input type="checkbox" name="grid" id="grid"></label>
+      <label for="draw">Toggle drawing
+        <input type="checkbox" name="draw" id="draw"></label>
+    </div>
   </nav>
 </body>
 

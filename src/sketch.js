@@ -2,72 +2,115 @@
 import P5 from 'p5'
 
 const main = document.querySelector('main')
+const boardCanvas = document.querySelector('#boardCanvas')
+const gridCanvas = document.querySelector('#gridCanvas')
 const playPauseButton = document.querySelector('#playpause')
-const randomButton = document.querySelector('#random')
+const shuffleButton = document.querySelector('#shuffle')
 const resetButton = document.querySelector('#reset')
 const speedInput = document.querySelector('#speed')
 const sizeInput = document.querySelector('#size')
 const colorInput = document.querySelector('#color')
 const gridInput = document.querySelector('#grid')
+const drawInput = document.querySelector('#draw')
 const populationSpan = document.querySelector('#population')
 const generationSpan = document.querySelector('#generation')
 const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
 
+const minMaxCellSize = [1, 60]
+const minMaxSpeed = [1, 60]
 let strokeSize = 1
 let cellSize = 30
-let speed = 60
+let speed = 20
 let cellColor = prefersDark ? '#ffffff' : '#000000'
 let displayGrid = true
+let drawingMode = false
+let isRunning = false
+
+let lastDrawnCell = { x: -1, y: -1 }
 
 let columnCount
 let rowCount
 
-let isRunning = false
 let currentPopulation = 0
 let currentGeneration = 0
 let currentCells = []
 let nextCells = []
 
-const w = main.scrollWidth
-const h = main.scrollHeight
+const w = main.scrollWidth - 1
+const h = main.scrollHeight - 1
 
 colorInput.value = cellColor
 speedInput.value = speed
 sizeInput.value = cellSize
 gridInput.checked = displayGrid
+drawInput.checked = drawingMode
 
 const sketch = (p5) => {
-  let grid
+  const gameActions = {
+    togglePlayPause: (value) => {
+      if (isRunning) {
+        p5.noLoop()
+      } else {
+        if (!currentPopulation) return
+        p5.loop()
+      }
 
-  const buttonActions = {
-    play: () => {
-      if (!currentPopulation) return
-      p5.loop()
-      updateIsRunning(true)
+      isRunning = value !== undefined ? value : !isRunning
+      playPauseButton.innerHTML = `${isRunning ? 'PAUSE' : 'PLAY'} (P)`
     },
-    pause: () => {
+    shuffle: () => {
       p5.noLoop()
-      updateIsRunning(false)
-    },
-    randomize: () => {
-      p5.noLoop()
-      updateIsRunning(false)
+      gameActions.togglePlayPause(false)
       randomizeBoard()
       paintBoard()
-      updateGeneration(1)
+      updateGeneration(0)
     },
     reset: () => {
       p5.noLoop()
-      updateIsRunning(false)
+      gameActions.togglePlayPause(false)
       generate(true)
       paintBoard()
       updateGeneration(0)
+    },
+    setSpeed: (value) => {
+      speed = value
+      speedInput.value = value
+      p5.frameRate(value)
+    },
+    setCellSize: (value) => {
+      cellSize = value
+      strokeSize = value > 20
+        ? 1
+        : (value / 20).toFixed(1)
+      sizeInput.value = value
+      updateCanvasSize()
+      updateGridSize()
+      grid.resize()
+      gameActions.reset()
+    },
+    setCellColor: (value) => {
+      cellColor = value
+      colorInput.value = value
+      paintBoard()
+    },
+    toggleGrid: (value) => {
+      const cleanValue = value !== undefined ? value : !displayGrid
+      displayGrid = cleanValue
+      gridInput.checked = cleanValue
+      grid.display(cleanValue)
+    },
+    toggleDrawingMode: (value) => {
+      const cleanValue = value !== undefined ? value : !drawingMode
+      drawingMode = cleanValue
+      drawInput.checked = cleanValue
+
+      boardCanvas.style.cursor = cleanValue ? 'url(\'/src/assets/pencil.ico\'), pointer' : 'auto'
     }
   }
 
   p5.setup = () => {
     p5.frameRate(speed)
-    p5.createCanvas(w - w % cellSize, h - h % cellSize)
+    p5.createCanvas(w - w % cellSize, h - h % cellSize, boardCanvas)
     p5.clear()
 
     updateGridSize()
@@ -75,34 +118,126 @@ const sketch = (p5) => {
 
     p5.noLoop()
     p5.describe(
-      "Grid of squares that switch between white and black, demonstrating a simulation of John Conway's Game of Life. When clicked, the simulation resets."
+      'A grid of squares alternating between black and white, visually representing a simulation of John Conway\'s Game of Life. With each tick, a new generation is born, evolving dynamically over time according to predefined rules.'
     )
 
-    playPauseButton.addEventListener('click', buttonActions.play)
-    randomButton.addEventListener('click', buttonActions.randomize)
-    resetButton.addEventListener('click', buttonActions.reset)
+    playPauseButton.addEventListener('click', gameActions.togglePlayPause)
+    shuffleButton.addEventListener('click', gameActions.shuffle)
+    resetButton.addEventListener('click', gameActions.reset)
     speedInput.addEventListener('input', (e) => {
-      speed = +e.target.value
-      p5.frameRate(speed)
+      const newSpeed = +e.target.value
+      gameActions.setSpeed(newSpeed)
     })
     sizeInput.addEventListener('input', (e) => {
-      cellSize = +e.target.value
-      strokeSize = cellSize > 20
-        ? 1
-        : (cellSize / 20).toFixed(1)
-
-      updateCanvasSize()
-      updateGridSize()
-      buttonActions.reset()
+      const newCellSize = +e.target.value
+      gameActions.setCellSize(newCellSize)
     })
     colorInput.addEventListener('change', (e) => {
-      cellColor = e.target.value
-      paintBoard()
+      const newCellColor = e.target.value
+      gameActions.setCellColor(newCellColor)
     })
     gridInput.addEventListener('change', (e) => {
-      displayGrid = e.target.checked
-      paintBoard()
+      gameActions.toggleGrid()
     })
+    drawInput.addEventListener('change', (e) => {
+      gameActions.toggleDrawingMode()
+    })
+    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', event => {
+      gameActions.setCellColor(event.matches ? '#ffffff' : '#000000')
+    })
+  }
+
+  p5.mouseClicked = (event) => {
+    if (
+      event.target.tagName !== 'CANVAS' ||
+      !drawingMode ||
+      (p5.mouseX < 0 || p5.mouseY < 0 || p5.mouseX > columnCount * cellSize || p5.mouseY >= rowCount * cellSize)
+    ) return
+
+    const cellX = p5.floor(p5.mouseX / cellSize)
+    const cellY = p5.floor(p5.mouseY / cellSize)
+
+    if (cellX === lastDrawnCell.x && cellY === lastDrawnCell.y) {
+      lastDrawnCell = { x: -1, y: -1 }
+      return
+    }
+
+    toggleCell(cellX, cellY)
+
+    lastDrawnCell = { x: -1, y: -1 }
+  }
+
+  p5.mouseDragged = (event) => {
+    if (
+      event.target.tagName !== 'CANVAS' ||
+      !drawingMode ||
+      (p5.mouseX < 0 || p5.mouseY < 0 || p5.mouseX > columnCount * cellSize || p5.mouseY >= rowCount * cellSize)
+    ) return
+
+    const cellX = p5.floor(p5.mouseX / cellSize)
+    const cellY = p5.floor(p5.mouseY / cellSize)
+
+    if (cellX === lastDrawnCell.x && cellY === lastDrawnCell.y) return
+
+    toggleCell(cellX, cellY)
+
+    lastDrawnCell = { x: cellX, y: cellY }
+  }
+
+  p5.keyPressed = () => {
+    let newSpeed, newCellSize
+
+    switch (p5.keyCode) {
+      // P
+      case 80:
+        gameActions.togglePlayPause()
+        break
+      // R
+      case 82:
+        gameActions.reset()
+        break
+      // S
+      case 83:
+        gameActions.shuffle()
+        break
+      // G
+      case 71:
+        gameActions.toggleGrid()
+        break
+      // D
+      case 68:
+        gameActions.toggleDrawingMode()
+        break
+      // UP
+      case 38:
+        newSpeed = p5.min(minMaxSpeed[1], speed + 1)
+        gameActions.setSpeed(newSpeed)
+        break
+      // DOWN
+      case 40:
+        newSpeed = p5.max(minMaxSpeed[0], speed - 1)
+        gameActions.setSpeed(newSpeed)
+        break
+      // LEFT
+      case 37:
+        newCellSize = p5.max(minMaxCellSize[0], cellSize - 1)
+        gameActions.setCellSize(newCellSize)
+        break
+      // RIGHT
+      case 39:
+        newCellSize = p5.min(minMaxCellSize[1], cellSize + 1)
+        gameActions.setCellSize(newCellSize)
+        break
+      default:
+        break
+    }
+  }
+
+  function toggleCell (x, y) {
+    const nextCellValue = currentCells[y][x] ? 0 : 1
+    currentCells[y][x] = nextCellValue
+    updatePopulation(nextCellValue ? 1 : -1)
+    paintCell(x, y)
   }
 
   function updateGridSize () {
@@ -113,34 +248,10 @@ const sketch = (p5) => {
       currentCells[row] = new Array(columnCount).fill(0)
       nextCells[row] = new Array(columnCount).fill(0)
     }
-
-    updateGridImage()
   }
 
   function updateCanvasSize () {
     p5.resizeCanvas(w - w % cellSize, h - h % cellSize)
-  }
-
-  function updateGridImage () {
-    grid = p5.createGraphics(p5.width, p5.height)
-    grid.clear()
-
-    grid.strokeWeight(strokeSize)
-    grid.stroke(100)
-
-    for (let row = 0; row <= rowCount; row++) {
-      grid.line(0, cellSize * row, p5.width, cellSize * row)
-    }
-    for (let col = 0; col <= columnCount; col++) {
-      grid.line(cellSize * col, 0, cellSize * col, p5.height)
-    }
-  }
-
-  function updateIsRunning (state) {
-    isRunning = state
-    playPauseButton.innerHTML = isRunning ? 'PAUSE' : 'PLAY'
-    playPauseButton.removeEventListener('click', isRunning ? buttonActions.play : buttonActions.pause)
-    playPauseButton.addEventListener('click', isRunning ? buttonActions.pause : buttonActions.play)
   }
 
   function updateGeneration (value) {
@@ -181,20 +292,17 @@ const sketch = (p5) => {
         paintCell(col, row)
       }
     }
-
-    if (displayGrid) {
-      p5.image(grid, 0, 0)
-    }
   }
 
-  function paintCell (x, y, paintGrid) {
+  function paintCell (x, y) {
+    const cellValue = currentCells[y][x]
+
     p5.fill(cellColor)
     p5.noStroke()
-    p5.rect(x * cellSize, y * cellSize, cellSize, cellSize)
+    if (!cellValue) p5.erase()
 
-    if (displayGrid && paintGrid) {
-      p5.image(grid, 0, 0)
-    }
+    p5.square(x * cellSize, y * cellSize, cellSize)
+    p5.noErase()
   }
 
   function randomizeBoard () {
@@ -241,3 +349,30 @@ const sketch = (p5) => {
 }
 
 new P5(sketch)
+
+const grid = new P5(p5 => {
+  p5.setup = () => {
+    p5.createCanvas(cellSize * columnCount, cellSize * rowCount, gridCanvas)
+    p5.noLoop()
+
+    p5.resize()
+  }
+
+  p5.resize = () => {
+    p5.resizeCanvas(cellSize * columnCount, cellSize * rowCount)
+    p5.clear()
+    p5.strokeWeight(strokeSize)
+    p5.stroke(100)
+
+    for (let row = 0; row <= rowCount; row++) {
+      p5.line(0, cellSize * row, p5.width, cellSize * row)
+    }
+    for (let col = 0; col <= columnCount; col++) {
+      p5.line(cellSize * col, 0, cellSize * col, p5.height)
+    }
+  }
+
+  p5.display = (value) => {
+    gridCanvas.style.display = value ? 'block' : 'none'
+  }
+})

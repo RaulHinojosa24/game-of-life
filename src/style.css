@@ -8,24 +8,19 @@
   box-sizing: border-box;
 }
 
-button:hover, input:hover {
+button, input {
   cursor: pointer;
 }
  
 body {
   margin: 0;
-  padding: 0;
   background-color: white;
-  width: 100vw;
-  height: 100vh;
-  max-height: 100vh;
-  overflow-x: hidden;
+  height: 100svh;
+  overflow: hidden;
   display: flex;
   flex-direction: row-reverse;
 }
-/* body:has(nav.right), nav.right #controls {
-  transform: rotateY(180deg);
-} */
+
 body:has(nav.right) {
   flex-direction: row;
 }
@@ -34,8 +29,20 @@ main {
   width: 100%;
   height: 100%;
   flex-shrink: 0;
-  display: grid;
-  place-content: center;
+  position: relative;
+  user-select: none;
+}
+
+main * {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  translate: -50% -50%;
+}
+
+#gridCanvas {
+  pointer-events: none;
+  z-index: 5;
 }
 
 nav {
@@ -46,6 +53,7 @@ nav {
   transform: translateX(24px);
   filter: drop-shadow(0px 3px 3px rgb(0, 0, 0, .5));
   pointer-events: none;
+  z-index: 10;
 }
 
 nav * {
@@ -66,11 +74,9 @@ nav.right.open {
 }
 
 #toggle-controls {
-  padding: 0;
-  padding-block: 2rem;
+  padding: 2rem 0;
   background-color: var(--menu-color);
   border: none;
-  margin-inline: auto;
   width: 24px;
   border-top-right-radius: 100%;
   border-bottom-right-radius: 100%;
@@ -98,26 +104,23 @@ nav.open #toggle-controls, #toggle-controls:hover, #toggle-controls:focus, #togg
 
 #controls {
   height: 100%;
-  width: min-content;
-  padding-inline: 1rem;
-  padding-block: 2rem;
+  padding: 2rem 1rem;
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 1rem;
   background-color: var(--menu-color);
+  overflow-y: auto;
 }
 
 label {
   display: flex;
   flex-direction: column-reverse;
   align-items: center;
-  justify-content: space-between;
 }
 
 button {
-  padding-inline: 1rem;
-  padding-block: 0.4rem;
+  padding: 0.4rem 1rem;
 }
 
 #details {
