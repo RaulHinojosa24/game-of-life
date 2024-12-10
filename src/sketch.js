@@ -1,6 +1,5 @@
 /* eslint-disable no-new */
 import P5 from 'p5'
-import PencilIcon from './assets/pencil.ico'
 
 const main = document.querySelector('main')
 const boardCanvas = document.querySelector('#boardCanvas')
@@ -105,7 +104,7 @@ const sketch = (p5) => {
       drawingMode = cleanValue
       drawInput.checked = cleanValue
 
-      boardCanvas.style.cursor = cleanValue ? `url(${PencilIcon}), pointer` : 'auto'
+      boardCanvas.style.cursor = cleanValue ? 'url(\'pencil.ico\'), pointer' : 'auto'
     }
   }
 
