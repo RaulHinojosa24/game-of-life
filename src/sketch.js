@@ -1,4 +1,3 @@
-/* eslint-disable no-new */
 import P5 from 'p5'
 
 const main = document.querySelector('main')
@@ -10,18 +9,23 @@ const resetButton = document.querySelector('#reset')
 const speedInput = document.querySelector('#speed')
 const sizeInput = document.querySelector('#size')
 const colorInput = document.querySelector('#color')
+const glowInput = document.querySelector('#glow')
 const gridInput = document.querySelector('#grid')
 const drawInput = document.querySelector('#draw')
 const populationSpan = document.querySelector('#population')
 const generationSpan = document.querySelector('#generation')
-const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
+let prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
 
+const getDefaultCellColor = () => prefersDark ? '#ffffff' : '#000000'
+const getDefaultGridColor = () => prefersDark ? '#333333' : '#999999'
 const minMaxCellSize = [1, 60]
 const minMaxSpeed = [1, 60]
+
 let strokeSize = 1
 let cellSize = 30
 let speed = 20
-let cellColor = prefersDark ? '#ffffff' : '#000000'
+let cellColor = getDefaultCellColor()
+let cellGlow = false
 let displayGrid = true
 let drawingMode = false
 let isRunning = false
@@ -40,13 +44,14 @@ const w = main.scrollWidth - 1
 const h = main.scrollHeight - 1
 
 colorInput.value = cellColor
+glowInput.checked = cellGlow
 speedInput.value = speed
 sizeInput.value = cellSize
 gridInput.checked = displayGrid
 drawInput.checked = drawingMode
 
-const sketch = (p5) => {
-  const gameActions = {
+const board = new P5(p5 => {
+  p5.gameActions = {
     togglePlayPause: (value) => {
       if (isRunning) {
         p5.noLoop()
@@ -60,14 +65,14 @@ const sketch = (p5) => {
     },
     shuffle: () => {
       p5.noLoop()
-      gameActions.togglePlayPause(false)
+      p5.gameActions.togglePlayPause(false)
       randomizeBoard()
       paintBoard()
       updateGeneration(0)
     },
     reset: () => {
       p5.noLoop()
-      gameActions.togglePlayPause(false)
+      p5.gameActions.togglePlayPause(false)
       generate(true)
       paintBoard()
       updateGeneration(0)
@@ -86,7 +91,7 @@ const sketch = (p5) => {
       updateCanvasSize()
       updateGridSize()
       grid.resize()
-      gameActions.reset()
+      p5.gameActions.reset()
     },
     setCellColor: (value) => {
       cellColor = value
@@ -120,31 +125,6 @@ const sketch = (p5) => {
     p5.describe(
       'A grid of squares alternating between black and white, visually representing a simulation of John Conway\'s Game of Life. With each tick, a new generation is born, evolving dynamically over time according to predefined rules.'
     )
-
-    playPauseButton.addEventListener('click', gameActions.togglePlayPause)
-    shuffleButton.addEventListener('click', gameActions.shuffle)
-    resetButton.addEventListener('click', gameActions.reset)
-    speedInput.addEventListener('input', (e) => {
-      const newSpeed = +e.target.value
-      gameActions.setSpeed(newSpeed)
-    })
-    sizeInput.addEventListener('input', (e) => {
-      const newCellSize = +e.target.value
-      gameActions.setCellSize(newCellSize)
-    })
-    colorInput.addEventListener('change', (e) => {
-      const newCellColor = e.target.value
-      gameActions.setCellColor(newCellColor)
-    })
-    gridInput.addEventListener('change', (e) => {
-      gameActions.toggleGrid()
-    })
-    drawInput.addEventListener('change', (e) => {
-      gameActions.toggleDrawingMode()
-    })
-    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', event => {
-      gameActions.setCellColor(event.matches ? '#ffffff' : '#000000')
-    })
   }
 
   p5.mouseClicked = (event) => {
@@ -190,43 +170,43 @@ const sketch = (p5) => {
     switch (p5.keyCode) {
       // P
       case 80:
-        gameActions.togglePlayPause()
+        p5.gameActions.togglePlayPause()
         break
       // R
       case 82:
-        gameActions.reset()
+        p5.gameActions.reset()
         break
       // S
       case 83:
-        gameActions.shuffle()
+        p5.gameActions.shuffle()
         break
       // G
       case 71:
-        gameActions.toggleGrid()
+        p5.gameActions.toggleGrid()
         break
       // D
       case 68:
-        gameActions.toggleDrawingMode()
+        p5.gameActions.toggleDrawingMode()
         break
       // UP
       case 38:
         newSpeed = p5.min(minMaxSpeed[1], speed + 1)
-        gameActions.setSpeed(newSpeed)
+        p5.gameActions.setSpeed(newSpeed)
         break
       // DOWN
       case 40:
         newSpeed = p5.max(minMaxSpeed[0], speed - 1)
-        gameActions.setSpeed(newSpeed)
+        p5.gameActions.setSpeed(newSpeed)
         break
       // LEFT
       case 37:
         newCellSize = p5.max(minMaxCellSize[0], cellSize - 1)
-        gameActions.setCellSize(newCellSize)
+        p5.gameActions.setCellSize(newCellSize)
         break
       // RIGHT
       case 39:
         newCellSize = p5.min(minMaxCellSize[1], cellSize + 1)
-        gameActions.setCellSize(newCellSize)
+        p5.gameActions.setCellSize(newCellSize)
         break
       default:
         break
@@ -346,9 +326,7 @@ const sketch = (p5) => {
 
     [currentCells, nextCells] = [nextCells, currentCells]
   }
-}
-
-new P5(sketch)
+})
 
 const grid = new P5(p5 => {
   p5.setup = () => {
@@ -362,7 +340,7 @@ const grid = new P5(p5 => {
     p5.resizeCanvas(cellSize * columnCount, cellSize * rowCount)
     p5.clear()
     p5.strokeWeight(strokeSize)
-    p5.stroke(100)
+    p5.stroke(getDefaultGridColor())
 
     for (let row = 0; row <= rowCount; row++) {
       p5.line(0, cellSize * row, p5.width, cellSize * row)
@@ -376,3 +354,43 @@ const grid = new P5(p5 => {
     gridCanvas.style.display = value ? 'block' : 'none'
   }
 })
+
+playPauseButton.addEventListener('click', board.gameActions.togglePlayPause)
+shuffleButton.addEventListener('click', board.gameActions.shuffle)
+resetButton.addEventListener('click', board.gameActions.reset)
+speedInput.addEventListener('input', (e) => {
+  const newSpeed = +e.target.value
+  board.gameActions.setSpeed(newSpeed)
+})
+sizeInput.addEventListener('input', (e) => {
+  const newCellSize = +e.target.value
+  board.gameActions.setCellSize(newCellSize)
+})
+colorInput.addEventListener('change', (e) => {
+  const newCellColor = e.target.value
+  board.gameActions.setCellColor(newCellColor)
+  updateCellGlow()
+})
+glowInput.addEventListener('change', (e) => {
+  cellGlow = e.target.checked
+  updateCellGlow()
+})
+gridInput.addEventListener('change', (e) => {
+  board.gameActions.toggleGrid()
+})
+drawInput.addEventListener('change', (e) => {
+  board.gameActions.toggleDrawingMode()
+})
+window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', event => {
+  prefersDark = event.matches
+  board.gameActions.setCellColor(getDefaultCellColor())
+  grid.resize()
+})
+
+const updateCellGlow = () => {
+  if (cellGlow) {
+    boardCanvas.style.filter = `drop-shadow(1px 1px 10px ${cellColor})`
+  } else {
+    boardCanvas.style.filter = ''
+  }
+}
