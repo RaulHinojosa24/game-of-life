@@ -120,7 +120,8 @@ const board = new P5(p5 => {
   p5.setup = () => {
     p5.frameRate(speed)
     p5.createCanvas(w - w % cellSize, h - h % cellSize, boardCanvas)
-    p5.clear()
+    p5.fill(0)
+    p5.noStroke()
 
     updateGridSize()
     updateBoardFilters()
@@ -268,7 +269,7 @@ const board = new P5(p5 => {
 
     for (let row = 0; row < rowCount; row++) {
       for (let col = 0; col < columnCount; col++) {
-        const currentCell = currentCells[row][col] || 0
+        const currentCell = currentCells[row][col]
 
         if (!currentCell) continue
 
@@ -280,14 +281,7 @@ const board = new P5(p5 => {
   }
 
   function paintCell (x, y) {
-    const cellValue = currentCells[y][x]
-
-    p5.fill(0)
-    p5.noStroke()
-    if (!cellValue) p5.erase()
-
     p5.square(x * cellSize, y * cellSize, cellSize)
-    p5.noErase()
   }
 
   function randomizeBoard () {
