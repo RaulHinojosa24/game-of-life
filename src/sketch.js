@@ -1,4 +1,5 @@
 import P5 from 'p5'
+import { generateFilter } from './hex-to-filter'
 
 const main = document.querySelector('main')
 const boardCanvas = document.querySelector('#boardCanvas')
@@ -17,15 +18,17 @@ const generationSpan = document.querySelector('#generation')
 let prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
 
 const getDefaultCellColor = () => prefersDark ? '#ffffff' : '#000000'
-const getDefaultGridColor = () => prefersDark ? '#333333' : '#999999'
+const getDefaultGridColor = () => prefersDark ? '#000000aa' : '#ffffffaa'
 const minMaxCellSize = [1, 60]
+const minMaxGlowSpread = [5, 10]
 const minMaxSpeed = [1, 60]
 
 let strokeSize = 1
 let cellSize = 30
 let speed = 20
 let cellColor = getDefaultCellColor()
-let cellGlow = false
+let cellColorFilter = generateFilter(cellColor)
+let cellGlow = true
 let displayGrid = true
 let drawingMode = false
 let isRunning = false
@@ -95,8 +98,9 @@ const board = new P5(p5 => {
     },
     setCellColor: (value) => {
       cellColor = value
+      cellColorFilter = generateFilter(value)
       colorInput.value = value
-      paintBoard()
+      updateBoardFilters()
     },
     toggleGrid: (value) => {
       const cleanValue = value !== undefined ? value : !displayGrid
@@ -119,7 +123,8 @@ const board = new P5(p5 => {
     p5.clear()
 
     updateGridSize()
-    paintBoard()
+    updateBoardFilters()
+    p5.gameActions.shuffle()
 
     p5.noLoop()
     p5.describe(
@@ -277,7 +282,7 @@ const board = new P5(p5 => {
   function paintCell (x, y) {
     const cellValue = currentCells[y][x]
 
-    p5.fill(cellColor)
+    p5.fill(0)
     p5.noStroke()
     if (!cellValue) p5.erase()
 
@@ -365,15 +370,15 @@ speedInput.addEventListener('input', (e) => {
 sizeInput.addEventListener('input', (e) => {
   const newCellSize = +e.target.value
   board.gameActions.setCellSize(newCellSize)
+  updateBoardFilters()
 })
-colorInput.addEventListener('change', (e) => {
+colorInput.addEventListener('input', (e) => {
   const newCellColor = e.target.value
   board.gameActions.setCellColor(newCellColor)
-  updateCellGlow()
 })
 glowInput.addEventListener('change', (e) => {
   cellGlow = e.target.checked
-  updateCellGlow()
+  updateBoardFilters()
 })
 gridInput.addEventListener('change', (e) => {
   board.gameActions.toggleGrid()
@@ -387,10 +392,8 @@ window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', eve
   grid.resize()
 })
 
-const updateCellGlow = () => {
-  if (cellGlow) {
-    boardCanvas.style.filter = `drop-shadow(1px 1px 10px ${cellColor})`
-  } else {
-    boardCanvas.style.filter = ''
-  }
+const updateBoardFilters = () => {
+  const shadowSpread = (cellSize - minMaxCellSize[0]) / (minMaxCellSize[1] - minMaxCellSize[0]) * (minMaxGlowSpread[1] - minMaxGlowSpread[0]) + minMaxGlowSpread[0]
+
+  boardCanvas.style.filter = `${cellColorFilter} ${cellGlow ? `drop-shadow(0px 0px ${shadowSpread}px ${cellColor})` : ''}`
 }
