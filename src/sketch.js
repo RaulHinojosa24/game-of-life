@@ -69,15 +69,18 @@ const board = new P5(p5 => {
     shuffle: () => {
       p5.noLoop()
       p5.gameActions.togglePlayPause(false)
-      randomizeBoard()
-      paintBoard()
+      updatePopulation(true)
       updateGeneration(0)
+      randomizeBoard()
+      p5.clear()
+      paintBoard()
     },
     reset: () => {
       p5.noLoop()
       p5.gameActions.togglePlayPause(false)
+      p5.clear()
       generate(true)
-      paintBoard()
+      updatePopulation(true)
       updateGeneration(0)
     },
     setSpeed: (value) => {
@@ -222,7 +225,7 @@ const board = new P5(p5 => {
   function toggleCell (x, y) {
     const nextCellValue = currentCells[y][x] ? 0 : 1
     currentCells[y][x] = nextCellValue
-    updatePopulation(nextCellValue ? 1 : -1)
+
     paintCell(x, y)
   }
 
@@ -258,22 +261,19 @@ const board = new P5(p5 => {
 
   p5.draw = () => {
     if (!isRunning) return
+    if (!currentPopulation) p5.gameActions.togglePlayPause(false)
     generate()
     updateGeneration()
     paintBoard()
   }
 
   function paintBoard () {
-    updatePopulation(true)
-    p5.clear()
-
     for (let row = 0; row < rowCount; row++) {
       for (let col = 0; col < columnCount; col++) {
         const currentCell = currentCells[row][col]
+        const nextCell = nextCells[row][col]
 
-        if (!currentCell) continue
-
-        updatePopulation(1)
+        if (currentCell === nextCell) continue
 
         paintCell(col, row)
       }
@@ -281,7 +281,11 @@ const board = new P5(p5 => {
   }
 
   function paintCell (x, y) {
+    const cellValue = currentCells[y][x]
+    updatePopulation(cellValue ? 1 : -1)
+    if (!cellValue) p5.erase()
     p5.square(x * cellSize, y * cellSize, cellSize)
+    if (!cellValue) p5.noErase()
   }
 
   function randomizeBoard () {
