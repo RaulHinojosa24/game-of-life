@@ -23,9 +23,11 @@ const minMaxCellSize = [1, 60]
 const minMaxGlowSpread = [5, 10]
 const minMaxSpeed = [1, 60]
 
-let strokeSize = 1
 let cellSize = 30
-let speed = 20
+let strokeSize = cellSize > 20
+  ? 1
+  : (cellSize / 20).toFixed(1)
+let speed = 60
 let cellColor = getDefaultCellColor()
 let cellColorFilter = generateFilter(cellColor)
 let cellGlow = true
@@ -53,6 +55,8 @@ sizeInput.value = cellSize
 gridInput.checked = displayGrid
 drawInput.checked = drawingMode
 
+let boardImage
+
 const board = new P5(p5 => {
   p5.gameActions = {
     togglePlayPause: (value) => {
@@ -69,10 +73,8 @@ const board = new P5(p5 => {
     shuffle: () => {
       p5.noLoop()
       p5.gameActions.togglePlayPause(false)
-      updatePopulation(true)
       updateGeneration(0)
       randomizeBoard()
-      p5.clear()
       paintBoard()
     },
     reset: () => {
@@ -82,6 +84,7 @@ const board = new P5(p5 => {
       generate(true)
       updatePopulation(true)
       updateGeneration(0)
+      updateVisualData()
     },
     setSpeed: (value) => {
       speed = value
@@ -123,6 +126,7 @@ const board = new P5(p5 => {
   p5.setup = () => {
     p5.frameRate(speed)
     p5.createCanvas(w - w % cellSize, h - h % cellSize, boardCanvas)
+    p5.noSmooth()
     p5.fill(0)
     p5.noStroke()
 
@@ -226,7 +230,7 @@ const board = new P5(p5 => {
     const nextCellValue = currentCells[y][x] ? 0 : 1
     currentCells[y][x] = nextCellValue
 
-    paintCell(x, y)
+    paintBoard()
   }
 
   function updateGridSize () {
@@ -247,16 +251,12 @@ const board = new P5(p5 => {
     currentGeneration = value !== undefined
       ? value
       : currentGeneration + 1
-
-    generationSpan.innerHTML = currentGeneration
   }
 
   function updatePopulation (amount) {
     currentPopulation = amount === true
       ? 0
       : currentPopulation + amount
-
-    populationSpan.innerHTML = currentPopulation
   }
 
   p5.draw = () => {
@@ -268,24 +268,38 @@ const board = new P5(p5 => {
   }
 
   function paintBoard () {
+    updatePopulation(true)
+    p5.clear()
+    boardImage = p5.createImage(p5.width, p5.height)
+    boardImage.loadPixels()
     for (let row = 0; row < rowCount; row++) {
       for (let col = 0; col < columnCount; col++) {
         const currentCell = currentCells[row][col]
-        const nextCell = nextCells[row][col]
 
-        if (currentCell === nextCell) continue
+        if (!currentCell) continue
+        updatePopulation(1)
 
         paintCell(col, row)
       }
     }
+    updateVisualData()
+    boardImage.updatePixels()
+    p5.image(boardImage, 0, 0)
   }
 
   function paintCell (x, y) {
-    const cellValue = currentCells[y][x]
-    updatePopulation(cellValue ? 1 : -1)
-    if (!cellValue) p5.erase()
-    p5.square(x * cellSize, y * cellSize, cellSize)
-    if (!cellValue) p5.noErase()
+    const pixel = y * 4 * columnCount * cellSize * cellSize + x * cellSize * 4
+
+    for (let j = 0; j < cellSize; j++) {
+      const yInc = j * columnCount * cellSize * 4
+      for (let i = 0; i < cellSize; i++) {
+        const xInc = i * 4
+        boardImage.pixels[pixel + yInc + xInc] = 0
+        boardImage.pixels[pixel + yInc + xInc + 1] = 0
+        boardImage.pixels[pixel + yInc + xInc + 2] = 0
+        boardImage.pixels[pixel + yInc + xInc + 3] = 255
+      }
+    }
   }
 
   function randomizeBoard () {
@@ -334,9 +348,11 @@ const board = new P5(p5 => {
 const grid = new P5(p5 => {
   p5.setup = () => {
     p5.createCanvas(cellSize * columnCount, cellSize * rowCount, gridCanvas)
+    p5.noSmooth()
     p5.noLoop()
 
     p5.resize()
+    p5.display(displayGrid)
   }
 
   p5.resize = () => {
@@ -394,4 +410,9 @@ const updateBoardFilters = () => {
   const shadowSpread = (cellSize - minMaxCellSize[0]) / (minMaxCellSize[1] - minMaxCellSize[0]) * (minMaxGlowSpread[1] - minMaxGlowSpread[0]) + minMaxGlowSpread[0]
 
   boardCanvas.style.filter = `${cellColorFilter} ${cellGlow ? `drop-shadow(0px 0px ${shadowSpread}px ${cellColor})` : ''}`
+}
+
+const updateVisualData = () => {
+  generationSpan.innerHTML = currentGeneration
+  populationSpan.innerHTML = currentPopulation
 }
