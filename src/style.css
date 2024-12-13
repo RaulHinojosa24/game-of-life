@@ -50,7 +50,7 @@ nav {
   display: flex;
   flex-direction: row-reverse;
   align-items: center;
-  transform: translateX(24px);
+  transform: translateX(20px);
   filter: drop-shadow(0px 3px 3px rgb(0, 0, 0, .5));
   pointer-events: none;
   z-index: 10;
@@ -62,27 +62,68 @@ nav * {
 
 nav.right {
   flex-direction: row;
-  transform: translateX(-24px);
+  transform: translateX(-20px);
 }
 
 nav.open {
-  transform: translateX(100%);
+  transform: translateX(calc(100% - 1px));
 }
 
 nav.right.open {
-  transform: translateX(-100%);
+  transform: translateX(calc(-100% + 1px));
 }
 
 #toggle-controls {
-  padding: 2rem 0;
+  display: flex;
+  justify-content: center;
+  position: relative;
+  padding: 48px 6px;
   background-color: var(--menu-color);
   border: none;
-  width: 24px;
-  border-top-right-radius: 100%;
-  border-bottom-right-radius: 100%;
+  width: 20px;
+  border-top-right-radius: 14px;
+  border-bottom-right-radius: 14px;
   transition: opacity .1s ease-in-out;
   opacity: .5;
   transform: translateX(-1px);
+}
+
+#toggle-controls #left, #toggle-controls #right {
+  position: absolute;
+  left: 0;
+  width: 15px;
+  height: 50px;
+  overflow: hidden;
+  z-index: 2;
+}
+
+#toggle-controls #left {
+  bottom: 100%;
+  transform: translateY(1px);
+}
+
+#toggle-controls #right {
+  top: 100%;
+  transform: translateY(-1px);
+}
+
+#toggle-controls #left::after, #toggle-controls #right::after {
+  box-sizing: content-box;
+  position: absolute;
+  right: 0;
+  content: '';
+  height: 102px;
+  width: 40px;
+  border-radius: 50%;
+  border: 20px solid var(--menu-color);
+}
+#toggle-controls #left::after {
+  top: 0;
+  transform: translate(50%, -50%);
+}
+#toggle-controls #right::after {
+  bottom: 0;
+  transform: translate(50%, 50%);
 }
 
 nav.right #toggle-controls {
@@ -90,6 +131,7 @@ nav.right #toggle-controls {
 }
 
 #toggle-controls svg {
+  flex-shrink: 0;
   rotate: 90deg;
   transition: transform .3s ease-in-out;
 }
