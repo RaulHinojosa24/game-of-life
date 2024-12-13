@@ -87,11 +87,13 @@ const board = new P5(p5 => {
       updateVisualData()
     },
     setSpeed: (value) => {
+      if (value === speed) return
       speed = value
       speedInput.value = value
       p5.frameRate(value)
     },
     setCellSize: (value) => {
+      if (value === cellSize) return
       cellSize = value
       strokeSize = value > 20
         ? 1
@@ -103,18 +105,21 @@ const board = new P5(p5 => {
       p5.gameActions.reset()
     },
     setCellColor: (value) => {
+      if (value === cellColor) return
       cellColor = value
       cellColorFilter = generateFilter(value)
       colorInput.value = value
       updateBoardFilters()
     },
     toggleGrid: (value) => {
+      if (value === displayGrid) return
       const cleanValue = value !== undefined ? value : !displayGrid
       displayGrid = cleanValue
       gridInput.checked = cleanValue
       grid.display(cleanValue)
     },
     toggleDrawingMode: (value) => {
+      if (value === drawingMode) return
       const cleanValue = value !== undefined ? value : !drawingMode
       drawingMode = cleanValue
       drawInput.checked = cleanValue
