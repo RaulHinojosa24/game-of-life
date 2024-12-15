@@ -45,8 +45,8 @@ let currentGeneration = 0
 let currentCells = []
 let nextCells = []
 
-const w = main.scrollWidth - 1
-const h = main.scrollHeight - 1
+let w = main.clientWidth - 1
+let h = main.clientHeight - 1
 
 colorInput.value = cellColor
 glowInput.checked = cellGlow
@@ -229,6 +229,20 @@ const board = new P5(p5 => {
       default:
         break
     }
+  }
+
+  let resizeTimeout
+  p5.windowResized = () => {
+    clearTimeout(resizeTimeout)
+
+    resizeTimeout = setTimeout(() => {
+      w = main.clientWidth - 1
+      h = main.clientHeight - 1
+
+      p5.resizeCanvas(w - w % cellSize, h - h % cellSize, boardCanvas)
+      updateGridSize()
+      grid.resize()
+    }, 200)
   }
 
   function toggleCell (x, y) {
