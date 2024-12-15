@@ -235,7 +235,12 @@ const board = new P5(p5 => {
     const nextCellValue = currentCells[y][x] ? 0 : 1
     currentCells[y][x] = nextCellValue
 
-    paintBoard()
+    updatePopulation(nextCellValue ? 1 : -1)
+    updateVisualData()
+
+    if (!nextCellValue) p5.erase()
+    p5.square(x * cellSize, y * cellSize, cellSize)
+    if (!nextCellValue) p5.noErase()
   }
 
   function updateGridSize () {
