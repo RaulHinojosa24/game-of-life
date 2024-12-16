@@ -2,14 +2,18 @@
   color-scheme: light dark;
   
   --menu-color: #f8f8f8;
+  --checkbox-color: #000;
+  --retro-button-color: #0D97AC;
 }
 
 *, *::after, *::before {
   box-sizing: border-box;
 }
 
-button, input {
-  cursor: pointer;
+html {
+  font-family: "VT323", monospace;
+  font-size: max(20px, 1rem);
+  letter-spacing: .05rem;
 }
  
 body {
@@ -19,6 +23,12 @@ body {
   overflow: hidden;
   display: flex;
   flex-direction: row-reverse;
+}
+
+button, input, label {
+  cursor: pointer;
+  font-family: inherit;
+  font-size: inherit;
 }
 
 body:has(nav.right) {
@@ -38,6 +48,48 @@ main * {
   left: 50%;
   top: 50%;
   translate: -50% -50%;
+}
+
+.modal {
+  background-color: rgba(0, 0, 0, 0.6);
+  position: absolute;
+  width: 100vw;
+  height: 100svh;
+  z-index: 20;
+  display: grid;
+  place-content: center;
+  backdrop-filter: blur(2px);
+  padding: 4rem 2rem;
+}
+
+.modal .content {
+  background-color: var(--menu-color);
+  border: 5px solid rgb(165, 165, 165);
+  margin-inline: auto;
+  max-width: max(50%, 720px);
+  padding: 1rem 2rem;
+  overflow-y: auto;
+  position: relative;
+  z-index: 1;
+}
+
+.sticky {
+  position: sticky;
+  top: 0;
+  height: 0;
+}
+
+.sticky button {
+  display: block;
+  margin-left: 100%;
+  background-color: transparent;
+  border: none;
+  font-size: 1.5rem;
+  padding: 0;
+}
+
+.modal:not(.open) {
+  display: none;
 }
 
 #gridCanvas {
@@ -94,7 +146,6 @@ nav.right.open {
   width: 15px;
   height: 50px;
   overflow: hidden;
-  z-index: 2;
 }
 
 #toggle-controls #left {
@@ -153,6 +204,8 @@ nav.open #toggle-controls, #toggle-controls:hover, #toggle-controls:focus, #togg
   gap: 1rem;
   background-color: var(--menu-color);
   overflow-y: auto;
+  position: relative;
+  z-index: 1;
 }
 
 label {
@@ -161,21 +214,148 @@ label {
   align-items: center;
 }
 
-button {
-  padding: 0.4rem 1rem;
-}
-
 #details {
+  width: 100%;
+}
+#details p {
+  margin: 0;
   display: flex;
   flex-direction: column;
+}
+
+/* RETRO BUTTON CSS */
+button.retro {
+  color: var(--checkbox-color);
+  text-decoration: none;
+  text-transform: uppercase;
+  border: none;
+  padding: 0.25rem 0.5rem;
+  box-shadow: 
+  0px 1px 0px 0px rgba(0, 0, 0, 0.2),
+  1px 0px 0px 0px rgba(0, 0, 0, 0.5),
+  1px 1px 0px 0px var(--retro-button-color),
+  1px 2px 0px 0px rgba(0, 0, 0, 0.2),
+  2px 1px 0px 0px rgba(0, 0, 0, 0.5),
+  2px 2px 0px 0px var(--retro-button-color),
+  2px 3px 0px 0px rgba(0, 0, 0, 0.2),
+  3px 2px 0px 0px rgba(0, 0, 0, 0.5),
+  3px 3px 0px 0px var(--retro-button-color),
+  3px 4px 0px 0px rgba(0, 0, 0, 0.2),
+  4px 3px 0px 0px rgba(0, 0, 0, 0.5),
+  4px 4px 0px 0px var(--retro-button-color),
+  4px 5px 0px 0px rgba(0, 0, 0, 0.2),
+  5px 4px 0px 0px rgba(0, 0, 0, 0.5),
+  5px 5px 0px 0px var(--retro-button-color);
+  position: relative;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: manipulation;
+  background-color: var(--retro-button-color);
+  text-wrap: nowrap;
+}
+
+button.retro::after {
+  z-index: -1;
+  content: '';
+  position: absolute;
+  width: calc(100% + 6px);
+  height: calc(100% + 6px);
+  background-color: black;
+  top: 2px;
+  left: 2px;
+}
+
+button.retro:active::after {
+  top: -3px;
+  left: -3px;
+}
+
+button.retro:active {
+  box-shadow: 0px 0px 0px 0px;
+  top: 5px;
+  left: 5px;
+}
+
+button.retro:active {
+  box-shadow: 0px 0px 0px 0px;
+  top: 5px;
+  left: 5px;
+}
+
+/* CHECKBOX CSS */
+input[type="checkbox"] {
+  display: none;
+}
+
+label:has(input[type="checkbox"]) {
+  height: 1.5rem;
+  aspect-ratio: 2;
+  background-color: var(--checkbox-color);
+  position: relative;
+}
+
+label:has(input[type="checkbox"])::after {
+  text-transform: uppercase;
+  display: grid;
+  place-content: center;
+  position: absolute;
+  width: calc(100% - 6px);
+  height: calc(100% - 6px);
+  top: -2px;
+  left: -2px;
+  background-color: var(--checkbox-color);
+  box-shadow: 
+  0px 1px 0px 0px rgba(0, 0, 0, 0.2),
+  1px 0px 0px 0px rgba(0, 0, 0, 0.5),
+  1px 1px 0px 0px var(--checkbox-color),
+  1px 2px 0px 0px rgba(0, 0, 0, 0.2),
+  2px 1px 0px 0px rgba(0, 0, 0, 0.5),
+  2px 2px 0px 0px var(--checkbox-color),
+  2px 3px 0px 0px rgba(0, 0, 0, 0.2),
+  3px 2px 0px 0px rgba(0, 0, 0, 0.5),
+  3px 3px 0px 0px var(--checkbox-color),
+  3px 4px 0px 0px rgba(0, 0, 0, 0.2),
+  4px 3px 0px 0px rgba(0, 0, 0, 0.5),
+  4px 4px 0px 0px var(--checkbox-color),
+  4px 5px 0px 0px rgba(0, 0, 0, 0.2),
+  5px 4px 0px 0px rgba(0, 0, 0, 0.5),
+  5px 5px 0px 0px var(--checkbox-color);
+}
+
+label:has(input[type="checkbox"]:active)::after {
+  box-shadow: 0px 0px 0px 0px;
+  top: 3px;
+  left: 3px;
+  filter: brightness(75%);
+}
+
+label:has(input[type="checkbox"])::after {
+  content: 'OFF';
+  --checkbox-color: #AB3131;
+}
+
+label:has(input[type="checkbox"]:checked)::after {
+  content: 'ON';
+  --checkbox-color: #799163;
+}
+
+@media (min-width: 768px) {
+  button.retro {
+    padding: 0.25rem 0.75rem;
+  }
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
     --menu-color: #1f1f1f;
+    --checkbox-color: #fff;
   }
 
   body {
     background-color: black;
+  }
+
+  button.retro::after {
+    background-color: white;
   }
 }
