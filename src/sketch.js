@@ -398,7 +398,7 @@ const grid = new P5(p5 => {
   }
 })
 
-playPauseButton.addEventListener('click', board.gameActions.togglePlayPause)
+playPauseButton.addEventListener('click', () => board.gameActions.togglePlayPause())
 shuffleButton.addEventListener('click', board.gameActions.shuffle)
 resetButton.addEventListener('click', board.gameActions.reset)
 speedInput.addEventListener('input', (e) => {
