@@ -107,9 +107,9 @@ const board = new P5(p5 => {
       clearTimeout(cellResizeTimeout)
 
       cellResizeTimeout = setTimeout(() => {
-      updateCanvasSize()
-      updateGridSize()
-      grid.resize()
+        updateCanvasSize()
+        updateGridSize()
+        grid.resize()
         p5.gameActions.shuffle()
       }, 200)
     },
