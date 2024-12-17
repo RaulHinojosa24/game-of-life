@@ -97,16 +97,16 @@ const board = new P5(p5 => {
     },
     setCellSize: (value) => {
       if (value === cellSize) return
-      cellSize = value
-      strokeSize = value > 20
-        ? 1
-        : (value / 20).toFixed(1)
-      sizeInput.value = value
-      updateBoardFilters()
 
       clearTimeout(cellResizeTimeout)
 
       cellResizeTimeout = setTimeout(() => {
+        cellSize = value
+        strokeSize = value > 20
+          ? 1
+          : (value / 20).toFixed(1)
+        sizeInput.value = value
+        updateBoardFilters()
         updateCanvasSize()
         updateGridSize()
         grid.resize()
