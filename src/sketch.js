@@ -250,6 +250,7 @@ const board = new P5(p5 => {
       p5.resizeCanvas(w - w % cellSize, h - h % cellSize, boardCanvas)
       updateGridSize()
       grid.resize()
+      p5.gameActions.shuffle()
     }, 200)
   }
 
