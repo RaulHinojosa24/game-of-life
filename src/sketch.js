@@ -254,8 +254,9 @@ const board = new P5(p5 => {
   }
 
   function toggleCell (x, y) {
-    const nextCellValue = currentCells[y][x] ? 0 : 1
-    currentCells[y][x] = nextCellValue
+    const cellIndex = index(x, y)
+    const nextCellValue = currentCells[cellIndex] ? 0 : 1
+    currentCells[cellIndex] = nextCellValue
 
     updatePopulation(nextCellValue ? 1 : -1)
     updateVisualData()
@@ -266,13 +267,16 @@ const board = new P5(p5 => {
   }
 
   function updateGridSize () {
-    columnCount = p5.floor(p5.width / cellSize)
-    rowCount = p5.floor(p5.height / cellSize)
+    columnCount = Math.floor(p5.width / cellSize)
+    rowCount = Math.floor(p5.height / cellSize)
 
-    for (let row = 0; row < rowCount; row++) {
-      currentCells[row] = new Array(columnCount).fill(0)
-      nextCells[row] = new Array(columnCount).fill(0)
-    }
+    const totalCells = rowCount * columnCount
+    currentCells = new Uint8Array(totalCells)
+    nextCells = new Uint8Array(totalCells)
+  }
+
+  function index (x, y) {
+    return y * columnCount + x
   }
 
   function updateCanvasSize () {
@@ -304,14 +308,14 @@ const board = new P5(p5 => {
     p5.clear()
     boardImage = p5.createImage(p5.width, p5.height)
     boardImage.loadPixels()
-    for (let row = 0; row < rowCount; row++) {
-      for (let col = 0; col < columnCount; col++) {
-        const currentCell = currentCells[row][col]
+    for (let y = 0; y < rowCount; y++) {
+      for (let x = 0; x < columnCount; x++) {
+        const cellIndex = index(x, y)
 
-        if (!currentCell) continue
+        if (!currentCells[cellIndex]) continue
+
         updatePopulation(1)
-
-        paintCell(col, row)
+        paintCell(x, y)
       }
     }
     updateVisualData()
@@ -335,41 +339,38 @@ const board = new P5(p5 => {
   }
 
   function randomizeBoard () {
-    for (let row = 0; row < rowCount; row++) {
-      for (let col = 0; col < columnCount; col++) {
-        currentCells[row][col] = p5.random([0, 1])
-      }
+    for (let i = 0; i < currentCells.length; i++) {
+      currentCells[i] = Math.random() > 0.5 ? 1 : 0
     }
   }
 
   function generate (reset) {
-    for (let row = 0; row < rowCount; row++) {
-      for (let col = 0; col < columnCount; col++) {
+    for (let y = 0; y < rowCount; y++) {
+      for (let x = 0; x < columnCount; x++) {
+        const cellIndex = index(x, y)
+
         if (reset) {
-          nextCells[row][col] = 0
+          nextCells[cellIndex] = 0
           continue
         }
 
-        const left = (col - 1 + columnCount) % columnCount
-        const right = (col + 1) % columnCount
-        const above = (row - 1 + rowCount) % rowCount
-        const below = (row + 1) % rowCount
+        const left = (x - 1 + columnCount) % columnCount
+        const right = (x + 1) % columnCount
+        const above = (y - 1 + rowCount) % rowCount
+        const below = (y + 1) % rowCount
 
         const neighbours =
-          currentCells[above][left] +
-          currentCells[above][col] +
-          currentCells[above][right] +
-          currentCells[row][left] +
-          currentCells[row][right] +
-          currentCells[below][left] +
-          currentCells[below][col] +
-          currentCells[below][right]
+          currentCells[index(left, above)] +
+          currentCells[index(x, above)] +
+          currentCells[index(right, above)] +
+          currentCells[index(left, y)] +
+          currentCells[index(right, y)] +
+          currentCells[index(left, below)] +
+          currentCells[index(x, below)] +
+          currentCells[index(right, below)]
 
-        nextCells[row][col] = (
-          neighbours === 3 || (neighbours === 2 && currentCells[row][col])
-        )
-          ? 1
-          : 0
+        nextCells[cellIndex] =
+          neighbours === 3 || (neighbours === 2 && currentCells[cellIndex]) ? 1 : 0
       }
     }
 
