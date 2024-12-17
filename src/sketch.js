@@ -57,6 +57,9 @@ drawInput.checked = drawingMode
 
 let boardImage
 
+let resizeTimeout
+let cellResizeTimeout
+
 const board = new P5(p5 => {
   p5.gameActions = {
     togglePlayPause: (value) => {
@@ -99,10 +102,16 @@ const board = new P5(p5 => {
         ? 1
         : (value / 20).toFixed(1)
       sizeInput.value = value
+      updateBoardFilters()
+
+      clearTimeout(cellResizeTimeout)
+
+      cellResizeTimeout = setTimeout(() => {
       updateCanvasSize()
       updateGridSize()
       grid.resize()
-      p5.gameActions.reset()
+        p5.gameActions.shuffle()
+      }, 200)
     },
     setCellColor: (value) => {
       if (value === cellColor) return
@@ -231,7 +240,6 @@ const board = new P5(p5 => {
     }
   }
 
-  let resizeTimeout
   p5.windowResized = () => {
     clearTimeout(resizeTimeout)
 
@@ -408,7 +416,6 @@ speedInput.addEventListener('input', (e) => {
 sizeInput.addEventListener('input', (e) => {
   const newCellSize = +e.target.value
   board.gameActions.setCellSize(newCellSize)
-  updateBoardFilters()
 })
 colorInput.addEventListener('input', (e) => {
   const newCellColor = e.target.value
@@ -430,13 +437,13 @@ window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', eve
   grid.resize()
 })
 
-const updateBoardFilters = () => {
+function updateBoardFilters () {
   const shadowSpread = (cellSize - minMaxCellSize[0]) / (minMaxCellSize[1] - minMaxCellSize[0]) * (minMaxGlowSpread[1] - minMaxGlowSpread[0]) + minMaxGlowSpread[0]
 
   boardCanvas.style.filter = `${cellColorFilter} ${cellGlow ? `drop-shadow(0px 0px ${shadowSpread}px ${cellColor})` : ''}`
 }
 
-const updateVisualData = () => {
+function updateVisualData () {
   generationSpan.innerHTML = currentGeneration
   populationSpan.innerHTML = currentPopulation
 }
