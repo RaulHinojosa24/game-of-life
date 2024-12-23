@@ -73,7 +73,7 @@ label {
 /* NAV */
 
 body:has(nav.right) {
-  flex-direction: row;
+  direction: rtl;
 }
 
 nav {
@@ -93,6 +93,7 @@ nav * {
 
 nav.right {
   flex-direction: row;
+  direction: ltr;
   transform: translateX(-20px);
 }
 
