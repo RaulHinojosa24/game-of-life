@@ -1,9 +1,13 @@
+/* ROOT AND GENERAL STYLING */
 :root {
   color-scheme: light dark;
   
-  --menu-color: #f8f8f8;
+  --menu-color: #fff;
   --checkbox-color: #000;
-  --retro-button-color: #0D97AC;
+  --checkbox-color-red: #D64C4C;
+  --checkbox-color-green: #A1B16D;
+  --retro-button-color: #11c1db;
+  --retro-info-color: #ffb23e;
 }
 
 *, *::after, *::before {
@@ -25,14 +29,9 @@ body {
   flex-direction: row-reverse;
 }
 
-button, input, label {
-  cursor: pointer;
-  font-family: inherit;
-  font-size: inherit;
-}
 
-body:has(nav.right) {
-  flex-direction: row;
+h1, h2, h3, h4, h5, h6, p {
+  margin: 0;
 }
 
 main {
@@ -50,51 +49,31 @@ main * {
   translate: -50% -50%;
 }
 
-.modal {
-  background-color: rgba(0, 0, 0, 0.6);
-  position: absolute;
-  width: 100vw;
-  height: 100svh;
-  z-index: 20;
-  display: grid;
-  place-content: center;
-  backdrop-filter: blur(2px);
-  padding: 4rem 2rem;
+button, input, label {
+  cursor: pointer;
+  font-family: inherit;
+  font-size: inherit;
 }
 
-.modal .content {
-  background-color: var(--menu-color);
-  border: 5px solid rgb(165, 165, 165);
-  margin-inline: auto;
-  max-width: max(50%, 720px);
-  padding: 1rem 2rem;
-  overflow-y: auto;
-  position: relative;
-  z-index: 1;
+label {
+  display: flex;
+  flex-direction: column-reverse;
+  align-items: center;
+  white-space: nowrap;
 }
 
-.sticky {
-  position: sticky;
-  top: 0;
-  height: 0;
+.input-group {
+  display: flex;
+  gap: .5rem;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
 }
 
-.sticky button {
-  display: block;
-  margin-left: 100%;
-  background-color: transparent;
-  border: none;
-  font-size: 1.5rem;
-  padding: 0;
-}
+/* NAV */
 
-.modal:not(.open) {
-  display: none;
-}
-
-#gridCanvas {
-  pointer-events: none;
-  z-index: 5;
+body:has(nav.right) {
+  flex-direction: row;
 }
 
 nav {
@@ -125,7 +104,7 @@ nav.right.open {
   transform: translateX(calc(-100% + 1px));
 }
 
-#toggle-controls {
+#toggle-nav {
   display: flex;
   justify-content: center;
   position: relative;
@@ -140,7 +119,7 @@ nav.right.open {
   transform: translateX(-1px);
 }
 
-#toggle-controls #left, #toggle-controls #right {
+#toggle-nav #left, #toggle-nav #right {
   position: absolute;
   left: 0;
   width: 15px;
@@ -148,17 +127,17 @@ nav.right.open {
   overflow: hidden;
 }
 
-#toggle-controls #left {
+#toggle-nav #left {
   bottom: 100%;
   transform: translateY(1px);
 }
 
-#toggle-controls #right {
+#toggle-nav #right {
   top: 100%;
   transform: translateY(-1px);
 }
 
-#toggle-controls #left::after, #toggle-controls #right::after {
+#toggle-nav #left::after, #toggle-nav #right::after {
   box-sizing: content-box;
   position: absolute;
   right: 0;
@@ -168,68 +147,121 @@ nav.right.open {
   border-radius: 50%;
   border: 20px solid var(--menu-color);
 }
-#toggle-controls #left::after {
+
+#toggle-nav #left::after {
   top: 0;
   transform: translate(50%, -50%);
 }
-#toggle-controls #right::after {
+
+#toggle-nav #right::after {
   bottom: 0;
   transform: translate(50%, 50%);
 }
 
-nav.right #toggle-controls {
+nav.right #toggle-nav {
   rotate: 180deg;
 }
 
-#toggle-controls svg {
+#toggle-nav svg {
   flex-shrink: 0;
   rotate: 90deg;
   transition: transform .3s ease-in-out;
 }
 
-nav.open #toggle-controls svg {
+nav.open #toggle-nav svg {
   transform: rotateX(180deg);
 }
 
-nav.open #toggle-controls, #toggle-controls:hover, #toggle-controls:focus, #toggle-controls:active {
+nav.open #toggle-nav, #toggle-nav:hover, #toggle-nav:focus, #toggle-nav:active {
   opacity: 1;
 }
 
-#controls {
+nav .container {
   height: 100%;
   padding: 2rem 1rem;
+  background-color: var(--menu-color);
+  overflow-y: auto;
+  position: relative;
+  z-index: 1;
   display: flex;
   flex-direction: column;
+  justify-content: space-between;
+}
+
+nav .container > * + * {
+  margin-top: 2rem;
+}
+
+#controls, #configuration {
+  display: flex;
+  flex-direction: column;
+  gap: .5rem;
   align-items: center;
-  gap: 1rem;
+}
+
+/* MODAL */
+
+.modal {
+  background-color: rgba(0, 0, 0, 0.6);
+  position: absolute;
+  width: 100vw;
+  height: 100svh;
+  z-index: 20;
+  display: grid;
+  place-content: center;
+  backdrop-filter: blur(2px);
+  padding: 4rem 2rem;
+}
+
+.modal .content {
   background-color: var(--menu-color);
+  border: 5px solid rgb(165, 165, 165);
+  margin-inline: auto;
+  max-width: max(50%, 720px);
+  padding: 1rem 2rem;
   overflow-y: auto;
   position: relative;
   z-index: 1;
 }
 
-label {
-  display: flex;
-  flex-direction: column-reverse;
-  align-items: center;
+.modal .content > * + * {
+  margin-top: 2rem;
 }
 
-#details {
-  width: 100%;
+.sticky {
+  position: sticky;
+  top: 0;
+  height: 0;
 }
-#details p {
-  margin: 0;
-  display: flex;
-  flex-direction: column;
+
+.sticky button {
+  display: block;
+  margin-left: 100%;
+  background-color: transparent;
+  border: none;
+  font-size: 1.5rem;
+  padding: 0;
+}
+
+.modal:not(.open) {
+  display: none;
+}
+
+/* CANVAS */
+
+#gridCanvas {
+  pointer-events: none;
+  z-index: 5;
 }
 
 /* RETRO BUTTON CSS */
+
 button.retro {
-  color: var(--checkbox-color);
   text-decoration: none;
   text-transform: uppercase;
   border: none;
-  padding: 0.25rem 0.5rem;
+  padding-inline: .75rem;
+  height: 1.5rem;
   box-shadow: 
   0px 1px 0px 0px rgba(0, 0, 0, 0.2),
   1px 0px 0px 0px rgba(0, 0, 0, 0.5),
@@ -254,15 +286,40 @@ button.retro {
   text-wrap: nowrap;
 }
 
+button.retro[type="info"] {
+  background-color: var(--retro-info-color);
+  box-shadow: 
+  0px 1px 0px 0px rgba(0, 0, 0, 0.2),
+  1px 0px 0px 0px rgba(0, 0, 0, 0.5),
+  1px 1px 0px 0px var(--retro-info-color),
+  1px 2px 0px 0px rgba(0, 0, 0, 0.2),
+  2px 1px 0px 0px rgba(0, 0, 0, 0.5),
+  2px 2px 0px 0px var(--retro-info-color),
+  2px 3px 0px 0px rgba(0, 0, 0, 0.2),
+  3px 2px 0px 0px rgba(0, 0, 0, 0.5),
+  3px 3px 0px 0px var(--retro-info-color),
+  3px 4px 0px 0px rgba(0, 0, 0, 0.2),
+  4px 3px 0px 0px rgba(0, 0, 0, 0.5),
+  4px 4px 0px 0px var(--retro-info-color),
+  4px 5px 0px 0px rgba(0, 0, 0, 0.2),
+  5px 4px 0px 0px rgba(0, 0, 0, 0.5),
+  5px 5px 0px 0px var(--retro-info-color);
+}
+
 button.retro::after {
   z-index: -1;
   content: '';
   position: absolute;
   width: calc(100% + 6px);
   height: calc(100% + 6px);
-  background-color: black;
+  border: 3px solid black;
+  background-color: var(--retro-button-color);
   top: 2px;
   left: 2px;
+}
+
+button.retro[type="info"]::after {
+  background-color: var(--retro-info-color);
 }
 
 button.retro:active::after {
@@ -271,18 +328,13 @@ button.retro:active::after {
 }
 
 button.retro:active {
-  box-shadow: 0px 0px 0px 0px;
-  top: 5px;
-  left: 5px;
-}
-
-button.retro:active {
-  box-shadow: 0px 0px 0px 0px;
+  box-shadow: none;
   top: 5px;
   left: 5px;
 }
 
 /* CHECKBOX CSS */
+
 input[type="checkbox"] {
   display: none;
 }
@@ -292,18 +344,6 @@ label:has(input[type="checkbox"]) {
   aspect-ratio: 2;
   background-color: var(--checkbox-color);
   position: relative;
-}
-
-label:has(input[type="checkbox"])::after {
-  text-transform: uppercase;
-  display: grid;
-  place-content: center;
-  position: absolute;
-  width: calc(100% - 6px);
-  height: calc(100% - 6px);
-  top: -2px;
-  left: -2px;
-  background-color: var(--checkbox-color);
   box-shadow: 
   0px 1px 0px 0px rgba(0, 0, 0, 0.2),
   1px 0px 0px 0px rgba(0, 0, 0, 0.5),
@@ -322,40 +362,90 @@ label:has(input[type="checkbox"])::after {
   5px 5px 0px 0px var(--checkbox-color);
 }
 
-label:has(input[type="checkbox"]:active)::after {
-  box-shadow: 0px 0px 0px 0px;
-  top: 3px;
-  left: 3px;
-  filter: brightness(75%);
+label:has(input[type="checkbox"]):active {
+  box-shadow: none;
+  transform: translate(5px, 5px);
 }
 
 label:has(input[type="checkbox"])::after {
+  z-index: -1;
+  content: '';
+  position: absolute;
+  width: calc(100% + 6px);
+  height: calc(100% + 6px);
+  border: 3px solid black;
+  background-color: var(--checkbox-color);
+  top: 2px;
+  left: 2px;
+}
+
+label:has(input[type="checkbox"]):active::after {
+  top: -3px;
+  left: -3px;
+}
+
+label:has(input[type="checkbox"])::before {
+  display: grid;
+  place-content: center;
+  width: 100%;
+  height: 100%;
+}
+
+label:has(input[type="checkbox"]) {
+  --checkbox-color: var(--checkbox-color-red);
+}
+
+label:has(input[type="checkbox"]:checked) {
+  --checkbox-color: var(--checkbox-color-green);
+}
+
+label:has(input[type="checkbox"])::before {
   content: 'OFF';
-  --checkbox-color: #AB3131;
 }
 
-label:has(input[type="checkbox"]:checked)::after {
+label:has(input[type="checkbox"]:checked)::before {
   content: 'ON';
-  --checkbox-color: #799163;
 }
 
-@media (min-width: 768px) {
-  button.retro {
-    padding: 0.25rem 0.75rem;
-  }
+/* COLOR PICKER CSS */
+
+input[type="color"] {
+  visibility: hidden;
+  width: 0;
+  height: 0;
+  margin: 0;
+  padding: 0;
+}
+
+label:has(input[type="color"]) {
+  box-sizing: content-box;
+  height: 1.5rem;
+  aspect-ratio: 2;
+  border: 3px solid black;
+  position: relative;
+}
+
+button.retro, label:has(input[type="checkbox"]) {
+  margin-right: 8px;
+  margin-bottom: 8px;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
     --menu-color: #1f1f1f;
-    --checkbox-color: #fff;
+    --retro-button-color: #0D97AC;
+    --checkbox-color-red: #AB3131;
+    --checkbox-color-green: #799163;
+    --retro-info-color: #FC9601;
   }
 
   body {
     background-color: black;
   }
 
-  button.retro::after {
-    background-color: white;
+  button.retro::after,
+  label:has(input[type="checkbox"])::after,
+  label:has(input[type="color"]) {
+    border-color: white;
   }
 }

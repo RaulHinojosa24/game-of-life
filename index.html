@@ -25,7 +25,7 @@
     <canvas id="gridCanvas"></canvas>
   </main>
   <nav>
-    <button type="button" id="toggle-controls">
+    <button type="button" id="toggle-nav">
       <span id="left"></span>
       <svg xmlns="http://www.w3.org/2000/svg" height='8px' fill="currentColor" viewBox="240 -640 480 296">
         <path d="M480-528 296-344l-56-56 240-240 240 240-56 56-184-184Z">
@@ -33,111 +33,139 @@
       </svg>
       <span id="right"></span>
     </button>
-    <div id="controls">
-      <div id="details">
-        <p>Population
-          <span id="population">0</span>
-        </p>
-        <p>Generation
-          <span id="generation">0</span>
-        </p>
-      </div>
-      <button class="retro" type="button" id="flip-side">FLIP CONTROLS</button>
-      <button class="retro" type="button" id="shuffle">SHUFFLE (S)</button>
-      <button class="retro" type="button" id="playpause">PLAY (P)</button>
-      <button class="retro" type="reset" id="reset">RESET (R)</button>
-      <label for="speed">FPS
-        <input type="range" name="speed" id="speed" min="1" max="60" step="1">
-      </label>
-      <label for="size">Cell size
-        <input type="range" name="size" id="size" min="1" max="60" step="1"></label>
-      <label for="color">Cell color
-        <input type="color" name="color" id="color"></label>
-      <div>
-        <label for="glow">Glow</label>
-        <label for="glow">
-          <input type="checkbox" name="glow" id="glow"></label>
-      </div>
-      <div>
-        <label for="grid">Grid</label>
-        <label for="grid">
-          <input type="checkbox" name="grid" id="grid"></label>
-      </div>
-      <div>
-        <label for="draw">Drawing</label>
-        <label for="draw">
-          <input type="checkbox" name="draw" id="draw"></label>
-      </div>
-      <button class="retro" type="button" id="about">About</button>
+    <div class="container">
+      <section id="controls">
+        <h2>Controls</h2>
+        <button class="retro" type="button" id="playpause">PLAY (P)</button>
+        <button class="retro" type="button" id="shuffle">SHUFFLE (S)</button>
+        <button class="retro" type="reset" id="reset">RESET (R)</button>
+        <button class="retro" type="button" id="flip-side">FLIP CONTROLS</button>
+        <button class="retro" type="button" id="fullscreen">FULLSCREEN (F11)</button>
+        <button class="retro" type="info" id="about">About</button>
+        <div class="input-group">
+          <label for="draw">Drawing (D)</label>
+          <label for="draw">
+            <input type="checkbox" name="draw" id="draw"></label>
+        </div>
+      </section>
+      <section id="configuration">
+        <h2>Configuration</h2>
+        <div class="input-group">
+          <label for="color">Color (C)</label>
+          <label for="color">
+            <input type="color" name="color" id="color">
+          </label>
+        </div>
+        <div class="input-group">
+          <label for="neon">Neon (N)</label>
+          <label for="neon">
+            <input type="checkbox" name="neon" id="neon">
+          </label>
+        </div>
+        <div class="input-group">
+          <label for="grid">Grid (G)</label>
+          <label for="grid">
+            <input type="checkbox" name="grid" id="grid">
+          </label>
+        </div>
+        <div class="input-group">
+          <label for="speed">Speed (▴▾)</label>
+          <input type="range" name="speed" id="speed" min="1" max="60" step="1">
+        </div>
+        <div class="input-group">
+          <label for="size">Size (◂▸)</label>
+          <input type="range" name="size" id="size" min="1" max="60" step="1">
+        </div>
+      </section>
+      <section id="details">
+        <p>Generation: <span id="generation">0</span> </p>
+        <p>Population: <span id="population">0</span> </p>
+      </section>
     </div>
   </nav>
   <div class="modal" id="rules">
-    <section class="content">
+    <div class="content">
       <div class="sticky">
         <button aria-label="Close modal">X</button>
       </div>
-      <h1>What is the Game of Life?</h1>
-      <p>
-        The <strong>Game of Life</strong> is a cellular automaton developed by British mathematician <strong>John
-          Conway</strong> in 1970. It’s a system where "cells" interact according to simple rules, leading to complex
-        and often surprising behaviors.
-      </p>
+      <section>
+        <h2>What is the Game of Life?</h2>
+        <p>
+          The <strong>Game of Life</strong> is a cellular automaton developed by British mathematician <strong>John
+            Conway</strong> in 1970. It’s a system where "cells" interact according to simple rules, leading to complex
+          and often surprising behaviors.
+        </p>
+      </section>
 
-      <h2>How does it work?</h2>
-      <p>
-        The Game of Life takes place on a grid (theoretically infinite but practically limited) where each cell can
-        exist in one of two states:
-      </p>
-      <ul>
-        <li><strong>Alive</strong> (represented as filled).</li>
-        <li><strong>Dead</strong> (represented as empty).</li>
-      </ul>
+      <section>
+        <h2>How does it work?</h2>
+        <p>
+          The Game of Life takes place on a grid (theoretically infinite but practically limited) where each cell can
+          exist in one of two states:
+        </p>
+        <ul>
+          <li><strong>Alive</strong> (represented as filled).</li>
+          <li><strong>Dead</strong> (represented as empty).</li>
+        </ul>
+      </section>
 
-      <h2>Basic rules</h2>
-      <p>In each step of time, called a <strong>generation</strong>, the cells' states update according to these rules:
-      </p>
-      <ol>
-        <li><strong>Survival:</strong> A living cell with <strong>2 or 3 living neighbors</strong> stays alive.</li>
-        <li><strong>Death:</strong>
-          <ul>
-            <li>A living cell with fewer than 2 neighbors dies of <strong>loneliness</strong>.</li>
-            <li>A living cell with more than 3 neighbors dies of <strong>overpopulation</strong>.</li>
-          </ul>
-        </li>
-        <li><strong>Birth:</strong> A dead cell with exactly <strong>3 living neighbors</strong> becomes alive.</li>
-      </ol>
+      <section>
+        <h2>Basic rules</h2>
+        <p>In each step of time, called a <strong>generation</strong>, the cells' states update according to these
+          rules:
+        </p>
+        <ol>
+          <li><strong>Survival:</strong> A living cell with <strong>2 or 3 living neighbors</strong> stays alive.</li>
+          <li><strong>Death:</strong>
+            <ul>
+              <li>A living cell with fewer than 2 neighbors dies of <strong>loneliness</strong>.</li>
+              <li>A living cell with more than 3 neighbors dies of <strong>overpopulation</strong>.</li>
+            </ul>
+          </li>
+          <li><strong>Birth:</strong> A dead cell with exactly <strong>3 living neighbors</strong> becomes alive.</li>
+        </ol>
+        <p>
+          Learn more:
+          <a href="https://en.wikipedia.org/wiki/Conway%27s_Game_of_Life" target="_blank"
+            rel="noopener noreferrer">Wikipedia - Conway's Game of Life</a>
+        </p>
+      </section>
 
-      <p>
-        Learn more:
-        <a href="https://en.wikipedia.org/wiki/Conway%27s_Game_of_Life" target="_blank"
-          rel="noopener noreferrer">Wikipedia - Conway's Game of Life</a>
-      </p>
+      <section>
+        <h2>App controls</h2>
+        <ul>
+          <li><strong>Play/Pause<span aria-label="Press P to activate the function">(P)</span>:</strong> Control the
+            evolution of the game.</li>
+          <li><strong>Shuffle<span aria-label="Press S to activate the function">(S)</span>:</strong> Or you can just
+            create a random board pattern.</li>
+          <li><strong>Reset<span aria-label="Press R to activate the function">(R)</span>:</strong> Clear the board to
+            start fresh.</li>
+          <li><strong>Draw<span aria-label="Press D to activate the function">(D)</span>:</strong> Toggle drawing mode
+            and draw your own initial pattern.</li>
+          <li><strong>Color<span aria-label="Press C to activate the function">(C)</span>:</strong> Change the color of
+            the cells.</li>
+          <li><strong>Neon<span aria-label="Press N to activate the function">(N)</span>:</strong> Toggle the neon glow
+            on the cells.</li>
+          <li><strong>Grid<span aria-label="Press G to activate the function">(G)</span>:</strong> Toggle the visibility
+            of the grid.</li>
+          <li><strong>Speed<span aria-label="Press UP/DOWN arrows to activate the function">(▴▾)</span>:</strong> Adjust
+            the speed of the generations.</li>
+          <li><strong>Size<span aria-label="Press LEFT/RIGHT arrows to activate the function">(◂▸)</span>:</strong>
+            Adjust the size of the cells: the smaller they are, the larger the grid becomes.</li>
+        </ul>
+        <p>If you use a keyboard, you can use certain keys to interact.</p>
+      </section>
 
-      <h2>App controls</h2>
-      <ul>
-        <li><strong>Draw<span aria-label="Press D to activate the function">(D)</span>:</strong> Toggle drawing mode and
-          draw your own initial pattern.</li>
-        <li><strong>Shuffle<span aria-label="Press S to activate the function">(S)</span>:</strong> Or you can just
-          create a random grid pattern.</li>
-        <li><strong>Play/Pause<span aria-label="Press P to activate the function">(P)</span>:</strong> Control the
-          evolution of the game.</li>
-        <li><strong>Reset<span aria-label="Press R to activate the function">(R)</span>:</strong> Clear the grid to
-          start fresh.</li>
-        <li><strong>Speed<span aria-label="Press UP/DOWN arrows to activate the function">(▴▾)</span>:</strong> Adjust
-          the speed of the generations.</li>
-        <li><strong>Size<span aria-label="Press LEFT/RIGHT arrows to activate the function">(◂▸)</span>:</strong> Adjust
-          the size of the cells: the smaller they are, the larger the grid becomes.</li>
-      </ul>
-      <p>If you use a keyboard, you can use certain keys to interact.</p>
-
-      <h2>Experiment and have fun!</h2>
-      <p>
-        The Game of Life has no objectives or winners: it’s a tool to explore creativity and logic. Try different
-        setups, observe what happens, and create your own patterns.
-      </p>
-      <button class="retro" type="button" aria-label="Close modal">Got it!</button>
-
-    </section>
+      <section>
+        <h2>Experiment and have fun!</h2>
+        <p>
+          The Game of Life has no objectives or winners: it’s a tool to explore creativity and logic. Try different
+          setups, observe what happens, and create your own patterns.
+        </p>
+      </section>
+      <button class="retro" style="margin-inline: auto; display: block;" type="info" aria-label="Close modal">Got
+        it!</button>
+    </div>
   </div>
 </body>
 

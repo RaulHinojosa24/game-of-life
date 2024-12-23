@@ -1,4 +1,5 @@
-const toggleControlsButton = document.querySelector('#toggle-controls')
+const toggleControlsButton = document.querySelector('#toggle-nav')
+const fullscreenButton = document.querySelector('#fullscreen')
 const flipSideButton = document.querySelector('#flip-side')
 const modalElement = document.querySelector('.modal')
 const aboutButton = document.querySelector('#about')
@@ -19,4 +20,11 @@ closeModalButtons.forEach(button => {
   button.addEventListener('click', () => {
     modalElement.classList.toggle('open')
   })
+})
+fullscreenButton.addEventListener('click', () => {
+  if (!document.fullscreenElement) {
+    document.documentElement.requestFullscreen()
+  } else if (document.exitFullscreen) {
+    document.exitFullscreen()
+  }
 })

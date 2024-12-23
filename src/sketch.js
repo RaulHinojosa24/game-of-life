@@ -10,7 +10,8 @@ const resetButton = document.querySelector('#reset')
 const speedInput = document.querySelector('#speed')
 const sizeInput = document.querySelector('#size')
 const colorInput = document.querySelector('#color')
-const glowInput = document.querySelector('#glow')
+const colorInputLabel = document.querySelector('label:has(#color)')
+const glowInput = document.querySelector('#neon')
 const gridInput = document.querySelector('#grid')
 const drawInput = document.querySelector('#draw')
 const populationSpan = document.querySelector('#population')
@@ -28,13 +29,14 @@ let strokeSize = cellSize > 20
   ? 1
   : (cellSize / 20).toFixed(1)
 let speed = 60
-let cellColor = getDefaultCellColor()
-let cellColorFilter = generateFilter(cellColor)
+let cellColor
+let cellColorFilter
 let cellGlow = true
 let displayGrid = true
 let drawingMode = false
 let isRunning = false
 
+let cellColorChanged = false
 let lastDrawnCell = { x: -1, y: -1 }
 
 let columnCount
@@ -118,6 +120,7 @@ const board = new P5(p5 => {
       cellColor = value
       cellColorFilter = generateFilter(value)
       colorInput.value = value
+      colorInputLabel.style.background = value
       updateBoardFilters()
     },
     toggleGrid: (value) => {
@@ -144,6 +147,8 @@ const board = new P5(p5 => {
     p5.fill(0)
     p5.noStroke()
 
+    p5.gameActions.setCellColor(getDefaultCellColor())
+    cellColorFilter = generateFilter(cellColor)
     updateGridSize()
     updateBoardFilters()
     p5.gameActions.shuffle()
@@ -192,7 +197,22 @@ const board = new P5(p5 => {
   }
 
   p5.keyPressed = () => {
-    let newSpeed, newCellSize
+    let newSpeed, newCellSize, element
+
+    // function longPress (actions) {
+    //   actions()
+    //   const timeout = setTimeout(() => {
+    //     if (!p5.keyIsPressed) {
+    //       clearTimeout(timeout)
+    //       return
+    //     }
+
+    //     const interval = setInterval(() => {
+    //       actions()
+    //       if (!p5.keyIsPressed) clearInterval(interval)
+    //     }, 50)
+    //   }, 200)
+    // }
 
     switch (p5.keyCode) {
       // P
@@ -214,6 +234,24 @@ const board = new P5(p5 => {
       // D
       case 68:
         p5.gameActions.toggleDrawingMode()
+        break
+      // C
+      case 67:
+        element = document.createElement('input')
+        element.type = 'color'
+        element.value = cellColor
+        element.addEventListener('input', (e) => {
+          cellColorChanged = true
+          const newCellColor = e.target.value
+          board.gameActions.setCellColor(newCellColor)
+        })
+        element.click()
+        break
+        // N
+      case 78:
+        cellGlow = !cellGlow
+        glowInput.checked = cellGlow
+        updateBoardFilters()
         break
       // UP
       case 38:
@@ -420,6 +458,7 @@ sizeInput.addEventListener('input', (e) => {
   board.gameActions.setCellSize(newCellSize)
 })
 colorInput.addEventListener('input', (e) => {
+  cellColorChanged = true
   const newCellColor = e.target.value
   board.gameActions.setCellColor(newCellColor)
 })
@@ -435,7 +474,9 @@ drawInput.addEventListener('change', (e) => {
 })
 window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', event => {
   prefersDark = event.matches
-  board.gameActions.setCellColor(getDefaultCellColor())
+  if (!cellColorChanged) {
+    board.gameActions.setCellColor(getDefaultCellColor())
+  }
   grid.resize()
 })
 
