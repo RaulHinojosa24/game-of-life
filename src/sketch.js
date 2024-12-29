@@ -24,6 +24,9 @@ const minMaxCellSize = [1, 60]
 const minMaxGlowSpread = [5, 10]
 const minMaxSpeed = [1, 60]
 
+let clientW = main.clientWidth - 1
+let clientH = main.clientHeight - 1
+
 let cellSize = 30
 let strokeSize = cellSize > 20
   ? 1
@@ -46,9 +49,6 @@ let currentPopulation = 0
 let currentGeneration = 0
 let currentCells = []
 let nextCells = []
-
-let w = main.clientWidth - 1
-let h = main.clientHeight - 1
 
 colorInput.value = cellColor
 glowInput.checked = cellGlow
@@ -142,13 +142,12 @@ const board = new P5(p5 => {
 
   p5.setup = () => {
     p5.frameRate(speed)
-    p5.createCanvas(w - w % cellSize, h - h % cellSize, boardCanvas)
+    p5.createCanvas(clientW - clientW % cellSize, clientH - clientH % cellSize, boardCanvas)
     p5.noSmooth()
     p5.fill(0)
     p5.noStroke()
 
     p5.gameActions.setCellColor(getDefaultCellColor())
-    cellColorFilter = generateFilter(cellColor)
     updateGridSize()
     updateBoardFilters()
     p5.gameActions.shuffle()
@@ -282,10 +281,10 @@ const board = new P5(p5 => {
     clearTimeout(resizeTimeout)
 
     resizeTimeout = setTimeout(() => {
-      w = main.clientWidth - 1
-      h = main.clientHeight - 1
+      clientW = main.clientWidth - 1
+      clientH = main.clientHeight - 1
 
-      p5.resizeCanvas(w - w % cellSize, h - h % cellSize, boardCanvas)
+      p5.resizeCanvas(clientW - clientW % cellSize, clientH - clientH % cellSize, boardCanvas)
       updateGridSize()
       grid.resize()
       p5.gameActions.shuffle()
@@ -319,7 +318,7 @@ const board = new P5(p5 => {
   }
 
   function updateCanvasSize () {
-    p5.resizeCanvas(w - w % cellSize, h - h % cellSize)
+    p5.resizeCanvas(clientW - clientW % cellSize, clientH - clientH % cellSize)
   }
 
   function updateGeneration (value) {
