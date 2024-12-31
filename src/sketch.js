@@ -1,5 +1,6 @@
 import P5 from 'p5'
 import { generateFilter } from './hex-to-filter'
+import { WELCOME_TEMPLATE } from './assets/templates'
 
 const main = document.querySelector('main')
 const boardCanvas = document.querySelector('#boardCanvas')
@@ -23,6 +24,7 @@ const getDefaultGridColor = () => prefersDark ? '#000000aa' : '#ffffffaa'
 const minMaxCellSize = [1, 60]
 const minMaxGlowSpread = [5, 10]
 const minMaxSpeed = [1, 60]
+const TEMPLATE_MARGINS = 5
 
 let clientW = main.clientWidth - 1
 let clientH = main.clientHeight - 1
@@ -137,6 +139,30 @@ const board = new P5(p5 => {
       drawInput.checked = cleanValue
 
       boardCanvas.style.cursor = cleanValue ? 'url(\'pencil.ico\'), pointer' : 'auto'
+    },
+    loadTemplate: (template) => {
+      p5.gameActions.reset()
+      cellSize = getTemplateCellSize(template)
+      updateCanvasSize()
+      updateGridSize()
+      updateBoardFilters()
+
+      const marginTop = Math.floor((rowCount - template.length) / 2)
+      const marginLeft = Math.floor((columnCount - template[0].length) / 2)
+
+      for (let y = 0; y < template.length; y++) {
+        const row = template[y]
+
+        for (let x = 0; x < row.length; x++) {
+          const cell = row[x]
+          if (!cell) continue
+
+          const idx = index(x + marginLeft, y + marginTop)
+          currentCells[idx] = cell
+        }
+      }
+
+      paintBoard()
     }
   }
 
@@ -150,7 +176,7 @@ const board = new P5(p5 => {
     p5.gameActions.setCellColor(getDefaultCellColor())
     updateGridSize()
     updateBoardFilters()
-    p5.gameActions.shuffle()
+    p5.gameActions.loadTemplate(WELCOME_TEMPLATE)
 
     p5.noLoop()
     p5.describe(
@@ -488,4 +514,19 @@ function updateBoardFilters () {
 function updateVisualData () {
   generationSpan.innerHTML = currentGeneration
   populationSpan.innerHTML = currentPopulation
+}
+
+function getTemplateCellSize (template) {
+  const neededWidth = template[0].length + TEMPLATE_MARGINS * 2
+  const neededHeight = template.length + TEMPLATE_MARGINS * 2
+
+  let size = minMaxCellSize[1]
+
+  for (; size >= minMaxCellSize[0]; size--) {
+    if (neededWidth * size <= clientW &&
+      neededHeight * size <= clientH
+    ) break
+  }
+
+  return Math.max(size, minMaxCellSize[0])
 }
