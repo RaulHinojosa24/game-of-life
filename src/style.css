@@ -256,6 +256,10 @@ nav .container > * + * {
 
 /* CANVAS */
 
+#boardCanvas {
+  transition: box-shadow .1s ease-in-out;
+}
+
 #gridCanvas {
   pointer-events: none;
   z-index: 5;

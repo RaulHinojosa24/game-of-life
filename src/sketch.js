@@ -15,6 +15,7 @@ const colorInputLabel = document.querySelector('label:has(#color)')
 const glowInput = document.querySelector('#neon')
 const gridInput = document.querySelector('#grid')
 const drawInput = document.querySelector('#draw')
+const boundariesInput = document.querySelector('#boundaries')
 const populationSpan = document.querySelector('#population')
 const generationSpan = document.querySelector('#generation')
 let prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
@@ -39,6 +40,7 @@ let cellColorFilter
 let cellGlow = true
 let displayGrid = true
 let drawingMode = false
+let boardBoundaries = false
 let isRunning = false
 
 let cellColorChanged = false
@@ -58,6 +60,7 @@ speedInput.value = speed
 sizeInput.value = cellSize
 gridInput.checked = displayGrid
 drawInput.checked = drawingMode
+boundariesInput.checked = boardBoundaries
 
 let boardImage
 
@@ -139,6 +142,12 @@ const board = new P5(p5 => {
       drawInput.checked = cleanValue
 
       boardCanvas.style.cursor = cleanValue ? 'url(\'pencil.ico\'), pointer' : 'auto'
+    },
+    toggleBoardBoundaries: (value) => {
+      if (value === boardBoundaries) return
+      const cleanValue = value !== undefined ? value : !boardBoundaries
+      boardBoundaries = cleanValue
+      boundariesInput.checked = cleanValue
     },
     loadTemplate: (template) => {
       p5.gameActions.reset()
@@ -272,10 +281,15 @@ const board = new P5(p5 => {
         })
         element.click()
         break
-        // N
+      // N
       case 78:
         cellGlow = !cellGlow
         glowInput.checked = cellGlow
+        updateBoardFilters()
+        break
+      // B
+      case 66:
+        p5.gameActions.toggleBoardBoundaries()
         updateBoardFilters()
         break
       // UP
@@ -340,6 +354,9 @@ const board = new P5(p5 => {
   }
 
   function index (x, y) {
+    if (x < 0 || y < 0 || x >= columnCount || y >= rowCount) {
+      return undefined
+    }
     return y * columnCount + x
   }
 
@@ -418,20 +435,28 @@ const board = new P5(p5 => {
           continue
         }
 
-        const left = (x - 1 + columnCount) % columnCount
-        const right = (x + 1) % columnCount
-        const above = (y - 1 + rowCount) % rowCount
-        const below = (y + 1) % rowCount
+        const left = boardBoundaries
+          ? x - 1
+          : (x - 1 + columnCount) % columnCount
+        const right = boardBoundaries
+          ? x + 1
+          : (x + 1) % columnCount
+        const above = boardBoundaries
+          ? y - 1
+          : (y - 1 + rowCount) % rowCount
+        const below = boardBoundaries
+          ? y + 1
+          : (y + 1) % rowCount
 
         const neighbours =
-          currentCells[index(left, above)] +
-          currentCells[index(x, above)] +
-          currentCells[index(right, above)] +
-          currentCells[index(left, y)] +
-          currentCells[index(right, y)] +
-          currentCells[index(left, below)] +
-          currentCells[index(x, below)] +
-          currentCells[index(right, below)]
+          (currentCells[index(left, above)] || 0) +
+          (currentCells[index(x, above)] || 0) +
+          (currentCells[index(right, above)] || 0) +
+          (currentCells[index(left, y)] || 0) +
+          (currentCells[index(right, y)] || 0) +
+          (currentCells[index(left, below)] || 0) +
+          (currentCells[index(x, below)] || 0) +
+          (currentCells[index(right, below)] || 0)
 
         nextCells[cellIndex] =
           neighbours === 3 || (neighbours === 2 && currentCells[cellIndex]) ? 1 : 0
@@ -509,6 +534,10 @@ function updateBoardFilters () {
   const shadowSpread = (cellSize - minMaxCellSize[0]) / (minMaxCellSize[1] - minMaxCellSize[0]) * (minMaxGlowSpread[1] - minMaxGlowSpread[0]) + minMaxGlowSpread[0]
 
   boardCanvas.style.filter = `${cellColorFilter} ${cellGlow ? `drop-shadow(0px 0px ${shadowSpread}px ${cellColor})` : ''}`
+
+  boardCanvas.style.boxShadow = boardBoundaries
+    ? '0 0 0 100vh black'
+    : 'none'
 }
 
 function updateVisualData () {
