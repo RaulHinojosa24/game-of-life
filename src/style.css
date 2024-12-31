@@ -259,6 +259,7 @@ nav .container > * + * {
 #gridCanvas {
   pointer-events: none;
   z-index: 5;
+  box-shadow: 0 0 0 1px #ffffffaa;
 }
 
 /* RETRO BUTTON CSS */
@@ -449,6 +450,10 @@ button.retro, label:has(input[type="checkbox"]) {
 
   body {
     background-color: black;
+  }
+
+  #gridCanvas {
+    box-shadow: 0 0 0 1px #000000aa;
   }
 
   button.retro::after,
