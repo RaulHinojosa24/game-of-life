@@ -225,8 +225,14 @@ nav .container > * + * {
   z-index: 1;
 }
 
-.modal .content > * + * {
-  margin-top: 2rem;
+.modal .content {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.modal section h2 {
+  margin-block: 1rem;
 }
 
 .sticky {
@@ -258,6 +264,7 @@ nav .container > * + * {
 /* RETRO BUTTON CSS */
 
 button.retro {
+  flex-shrink: 0;
   text-decoration: none;
   text-transform: uppercase;
   border: none;
