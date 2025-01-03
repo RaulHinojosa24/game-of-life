@@ -52,6 +52,8 @@ function setUserInteracted (value) {
 let cellColorChanged = false
 let lastDrawnCell = { x: -1, y: -1 }
 
+let prevColumnCount
+let prevRowCount
 let columnCount
 let rowCount
 
@@ -59,6 +61,7 @@ let currentPopulation = 0
 let currentGeneration = 0
 let currentCells = []
 let nextCells = []
+let prevCells = []
 
 colorInput.value = cellColor
 glowInput.checked = cellGlow
@@ -151,8 +154,8 @@ const board = new P5(p5 => {
           : (value / 20).toFixed(1)
         sizeInput.value = value
         updateBoardSize()
-        p5.gameActions.shuffle()
-      }, 200)
+        p5.gameActions.scaleBoard()
+      }, 100)
     },
     setCellColor: (value) => {
       if (value === cellColor) return
@@ -202,6 +205,23 @@ const board = new P5(p5 => {
           const idx = index(x + marginLeft, y + marginTop)
           currentCells[idx] = cell
         }
+      }
+
+      paintBoard()
+    },
+    scaleBoard: () => {
+      const wDiff = columnCount - prevColumnCount
+      const wDiffHalf = Math.floor(wDiff / 2)
+      const hDiff = rowCount - prevRowCount
+      const hDiffHalf = Math.floor(hDiff / 2)
+
+      for (let y = 0; y < rowCount; y++) {
+        const prevY = y - hDiffHalf
+        if (prevY < 0 || prevY >= prevRowCount) continue
+
+        const newArr = prevCells.slice(prevColumnCount * prevY + Math.max(0, 0 - wDiffHalf), prevColumnCount * prevY + Math.min(prevColumnCount + wDiffHalf, prevColumnCount))
+
+        currentCells.set(newArr, index(Math.max(0, 0 + wDiffHalf), y))
       }
 
       paintBoard()
@@ -359,8 +379,10 @@ const board = new P5(p5 => {
       clientH = main.clientHeight - 1
 
       updateBoardSize()
-      p5.gameActions.shuffle()
-    }, 200)
+
+      if (userInteracted) p5.gameActions.scaleBoard()
+      else p5.gameActions.loadTemplate(WELCOME_TEMPLATE)
+    }, 100)
   }
 
   function toggleCell (x, y) {
@@ -377,10 +399,13 @@ const board = new P5(p5 => {
   }
 
   function updateGridSize () {
+    prevColumnCount = columnCount
+    prevRowCount = rowCount
     columnCount = Math.floor(p5.width / cellSize)
     rowCount = Math.floor(p5.height / cellSize)
 
     const totalCells = rowCount * columnCount
+    prevCells = currentCells
     currentCells = new Uint8Array(totalCells)
     nextCells = new Uint8Array(totalCells)
   }
