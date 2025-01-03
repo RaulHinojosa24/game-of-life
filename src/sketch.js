@@ -499,6 +499,7 @@ const grid = new P5(p5 => {
 playPauseButton.addEventListener('click', () => board.gameActions.togglePlayPause())
 shuffleButton.addEventListener('click', board.gameActions.shuffle)
 resetButton.addEventListener('click', board.gameActions.reset)
+boundariesInput.addEventListener('click', () => board.gameActions.toggleBoardBoundaries())
 speedInput.addEventListener('input', (e) => {
   const newSpeed = +e.target.value
   board.gameActions.setSpeed(newSpeed)
