@@ -42,6 +42,12 @@ let displayGrid = true
 let drawingMode = false
 let boardBoundaries = false
 let isRunning = false
+let userInteracted = false
+
+function setUserInteracted (value) {
+  if (userInteracted) return
+  userInteracted = value
+}
 
 let cellColorChanged = false
 let lastDrawnCell = { x: -1, y: -1 }
@@ -98,7 +104,8 @@ const grid = new P5(p5 => {
 
 const board = new P5(p5 => {
   p5.gameActions = {
-    togglePlayPause: (value) => {
+    togglePlayPause: (value, byAdmin) => {
+      if (!byAdmin) setUserInteracted(true)
       if (isRunning) {
         p5.noLoop()
       } else {
@@ -116,9 +123,9 @@ const board = new P5(p5 => {
       randomizeBoard()
       paintBoard()
     },
-    reset: () => {
+    reset: (byAdmin) => {
       p5.noLoop()
-      p5.gameActions.togglePlayPause(false)
+      p5.gameActions.togglePlayPause(false, byAdmin)
       p5.clear()
       generate(true)
       updatePopulation(true)
@@ -133,6 +140,7 @@ const board = new P5(p5 => {
     },
     setCellSize: (value) => {
       if (value === cellSize) return
+      setUserInteracted(true)
 
       clearTimeout(cellResizeTimeout)
 
@@ -177,7 +185,7 @@ const board = new P5(p5 => {
       updateBoardFilters()
     },
     loadTemplate: (template) => {
-      p5.gameActions.reset()
+      p5.gameActions.reset(true)
       cellSize = getTemplateCellSize(template)
       updateBoardSize()
 
@@ -223,6 +231,8 @@ const board = new P5(p5 => {
       (p5.mouseX < 0 || p5.mouseY < 0 || p5.mouseX > columnCount * cellSize || p5.mouseY >= rowCount * cellSize)
     ) return
 
+    setUserInteracted(true)
+
     const cellX = p5.floor(p5.mouseX / cellSize)
     const cellY = p5.floor(p5.mouseY / cellSize)
 
@@ -242,6 +252,8 @@ const board = new P5(p5 => {
       !drawingMode ||
       (p5.mouseX < 0 || p5.mouseY < 0 || p5.mouseX > columnCount * cellSize || p5.mouseY >= rowCount * cellSize)
     ) return
+
+    setUserInteracted(true)
 
     const cellX = p5.floor(p5.mouseX / cellSize)
     const cellY = p5.floor(p5.mouseY / cellSize)
