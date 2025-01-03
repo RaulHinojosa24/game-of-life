@@ -67,6 +67,35 @@ let boardImage
 let resizeTimeout
 let cellResizeTimeout
 
+const grid = new P5(p5 => {
+  p5.setup = () => {
+    p5.createCanvas(cellSize * columnCount, cellSize * rowCount, gridCanvas)
+    p5.noSmooth()
+    p5.noLoop()
+
+    p5.resize()
+    p5.display(displayGrid)
+  }
+
+  p5.resize = () => {
+    p5.resizeCanvas(cellSize * columnCount, cellSize * rowCount)
+    p5.clear()
+    p5.strokeWeight(strokeSize)
+    p5.stroke(getDefaultGridColor())
+
+    for (let row = 0; row <= rowCount; row++) {
+      p5.line(0, cellSize * row, p5.width, cellSize * row)
+    }
+    for (let col = 0; col <= columnCount; col++) {
+      p5.line(cellSize * col, 0, cellSize * col, p5.height)
+    }
+  }
+
+  p5.display = (value) => {
+    gridCanvas.style.display = value ? 'block' : 'none'
+  }
+})
+
 const board = new P5(p5 => {
   p5.gameActions = {
     togglePlayPause: (value) => {
@@ -113,10 +142,7 @@ const board = new P5(p5 => {
           ? 1
           : (value / 20).toFixed(1)
         sizeInput.value = value
-        updateBoardFilters()
-        updateCanvasSize()
-        updateGridSize()
-        grid.resize()
+        updateBoardSize()
         p5.gameActions.shuffle()
       }, 200)
     },
@@ -148,13 +174,12 @@ const board = new P5(p5 => {
       const cleanValue = value !== undefined ? value : !boardBoundaries
       boardBoundaries = cleanValue
       boundariesInput.checked = cleanValue
+      updateBoardFilters()
     },
     loadTemplate: (template) => {
       p5.gameActions.reset()
       cellSize = getTemplateCellSize(template)
-      updateCanvasSize()
-      updateGridSize()
-      updateBoardFilters()
+      updateBoardSize()
 
       const marginTop = Math.floor((rowCount - template.length) / 2)
       const marginLeft = Math.floor((columnCount - template[0].length) / 2)
@@ -183,8 +208,6 @@ const board = new P5(p5 => {
     p5.noStroke()
 
     p5.gameActions.setCellColor(getDefaultCellColor())
-    updateGridSize()
-    updateBoardFilters()
     p5.gameActions.loadTemplate(WELCOME_TEMPLATE)
 
     p5.noLoop()
@@ -290,7 +313,6 @@ const board = new P5(p5 => {
       // B
       case 66:
         p5.gameActions.toggleBoardBoundaries()
-        updateBoardFilters()
         break
       // UP
       case 38:
@@ -324,9 +346,7 @@ const board = new P5(p5 => {
       clientW = main.clientWidth - 1
       clientH = main.clientHeight - 1
 
-      p5.resizeCanvas(clientW - clientW % cellSize, clientH - clientH % cellSize, boardCanvas)
-      updateGridSize()
-      grid.resize()
+      updateBoardSize()
       p5.gameActions.shuffle()
     }, 200)
   }
@@ -360,8 +380,11 @@ const board = new P5(p5 => {
     return y * columnCount + x
   }
 
-  function updateCanvasSize () {
+  function updateBoardSize () {
     p5.resizeCanvas(clientW - clientW % cellSize, clientH - clientH % cellSize)
+    updateGridSize()
+    updateBoardFilters()
+    grid.resize()
   }
 
   function updateGeneration (value) {
@@ -464,35 +487,6 @@ const board = new P5(p5 => {
     }
 
     [currentCells, nextCells] = [nextCells, currentCells]
-  }
-})
-
-const grid = new P5(p5 => {
-  p5.setup = () => {
-    p5.createCanvas(cellSize * columnCount, cellSize * rowCount, gridCanvas)
-    p5.noSmooth()
-    p5.noLoop()
-
-    p5.resize()
-    p5.display(displayGrid)
-  }
-
-  p5.resize = () => {
-    p5.resizeCanvas(cellSize * columnCount, cellSize * rowCount)
-    p5.clear()
-    p5.strokeWeight(strokeSize)
-    p5.stroke(getDefaultGridColor())
-
-    for (let row = 0; row <= rowCount; row++) {
-      p5.line(0, cellSize * row, p5.width, cellSize * row)
-    }
-    for (let col = 0; col <= columnCount; col++) {
-      p5.line(cellSize * col, 0, cellSize * col, p5.height)
-    }
-  }
-
-  p5.display = (value) => {
-    gridCanvas.style.display = value ? 'block' : 'none'
   }
 })
 
